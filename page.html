@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survival Game</title>
+    <link rel="stylesheet" href="page.css">
+</head>
+
+<body>
+    <div class="stars"></div>
+    <div class="button-container">
+        <a href="./index.html" class="page-button">PLAY</a>
+        <a href="./menu.html" class="page-button">MENU</a>
+        <a href="./rules.html" class="page-button">RULES</a>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const starsContainer = document.querySelector(".stars");
+
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement("div");
+                star.classList.add("star");
+
+                const starTailLength = Math.random() * (7.5 - 5) + 5;
+                const topOffset = Math.random() * 100;
+                const fallDuration = Math.random() * (12 - 6) + 6;
+                const fallDelay = Math.random() * 10;
+
+                star.style.setProperty("--star-tail-length", `${starTailLength}em`);
+                star.style.setProperty("--top-offset", `${topOffset}vh`);
+                star.style.setProperty("--fall-duration", `${fallDuration}s`);
+                star.style.setProperty("--fall-delay", `${fallDelay}s`);
+
+                starsContainer.appendChild(star);
+            }
+        });
+    </script>
+</body>
+
+</html>
