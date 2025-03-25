@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skóre</title>
+    <link rel="stylesheet" href="page.css">
+
+</head>
+
+<body>
+    <div class="stars"></div>
+
+    <div id="wrapper">
+        <h1>Game Over</h1>
+        <p id="scoreMessage"></p>
+
+        <div class="button-container">
+            <a href="./index.html" class="page-button">PLAY AGAIN</a>
+            <a href="./page.html" class="page-button">MENU</a>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const starsContainer = document.querySelector(".stars");
+
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement("div");
+                star.classList.add("star");
+
+                const starTailLength = Math.random() * (7.5 - 5) + 5;
+                const topOffset = Math.random() * 100;
+                const fallDuration = Math.random() * (12 - 6) + 6;
+                const fallDelay = Math.random() * 10;
+
+                star.style.setProperty("--star-tail-length", `${starTailLength}em`);
+                star.style.setProperty("--top-offset", `${topOffset}vh`);
+                star.style.setProperty("--fall-duration", `${fallDuration}s`);
+                star.style.setProperty("--fall-delay", `${fallDelay}s`);
+
+                starsContainer.appendChild(star);
+            }
+
+
+            // Funkcia na získanie query parametra zo URL
+            function getQueryParameter(name) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
+            }
+
+            // Získanie skóre z query parametra
+            const score = getQueryParameter('score');
+
+            // Zobrazenie skóre
+            if (score) {
+                let message = "";
+                if (score < 5) {
+                    message = "To je slabé, skúste znova!";
+                } else if (score <= 10) {
+                    message = "Je to dobré!";
+                } else {
+                    message = "Skvelé, pokračujte v práci!";
+                }
+
+                // Zobraziť skóre a hodnotenie
+                document.getElementById("scoreMessage").innerText = "Úroveň: " + score + " - " + message;
+            } else {
+                document.getElementById("scoreMessage").innerText = "No score found.";
+            }
+        });
+    </script>
+
+</body>
+
+</html>

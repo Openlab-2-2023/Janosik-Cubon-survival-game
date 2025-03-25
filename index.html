@@ -8,6 +8,12 @@
 </head>
 <body>
     <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <div id="gameOverScreen" style="display: none;">
+        <h1>Koniec hry!</h1>
+        <p>Dosiahnutý level: <span id="finalWave">0</span></p>
+        <button onclick="restartGame()">Reštartovať hru</button>
+        <button onclick="goHome()">Návrat na hlavnú stránku</button>
+    </div>
     <script src="script.js"></script>
 </body>
 

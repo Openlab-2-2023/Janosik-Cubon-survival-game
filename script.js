@@ -10,6 +10,8 @@ window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 const hpText = document.getElementById("hpText");
+const gameOverScreen = document.getElementById("gameOverScreen");
+const finalWaveText = document.getElementById("finalWave");
 
 // Hráč
 let player = { x: canvas.width / 2, y: canvas.height / 2, size: 20, speed: 3, hp: 5, maxHp: 5 };
@@ -73,11 +75,12 @@ function moveEnemies() {
 
         if (Math.abs(player.x - enemy.x) < player.size && Math.abs(player.y - enemy.y) < player.size) {
             player.hp = Math.max(0, player.hp - 1); // Neumrie hneď, len stratí HP
-            hpText.innerText = "HP: " + player.hp;
+            player.hp = 0;
+            // hpText.innerText = "HP: " + player.hp;
 
+            // Ukoncenie hry
             if (player.hp <= 0) {
-                alert("Koniec hry!");
-                location.reload();
+                endGame();
             }
         }
     });
@@ -96,8 +99,7 @@ function moveEnemies() {
             hpText.innerText = "HP: " + player.hp;
 
             if (player.hp <= 0) {
-                alert("Koniec hry!");
-                location.reload();
+                endGame();
             }
         }
     }
@@ -143,7 +145,7 @@ function shootBullet(event) {
     let rect = canvas.getBoundingClientRect();
     let mouseX = event.clientX - rect.left;
     let mouseY = event.clientY - rect.top;
-    
+
     let angle = Math.atan2(mouseY - player.y, mouseX - player.x);
     let speed = 5;
 
@@ -205,6 +207,8 @@ function draw() {
 }
 
 // Herná slučka
+let gameLoopId;
+
 function gameLoop() {
     movePlayer();
     moveEnemies();
@@ -215,7 +219,55 @@ function gameLoop() {
         startNewWave();
     }
 
-    requestAnimationFrame(gameLoop);
+    gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+// Koniec hry
+function endGame() {
+    enemies = [];
+    document.getElementById("gameOverScreen").style.display = "block";
+    finalWaveText.innerText = currentWave;
+
+    // Vyhodnotenie skóre
+    let scoreMessage = "";
+    if (currentWave < 5) {
+        scoreMessage = "To je slabé, skúste znova!";
+    } else if (currentWave <= 10) {
+        scoreMessage = "Je to dobré!";
+    } else {
+        scoreMessage = "Skvelé, pokračujte v práci!";
+    }
+
+    // Zobrazenie hodnotenia
+    const scoreText = document.createElement('p');
+    scoreText.innerText = "Úroveň: " + currentWave + " - " + scoreMessage;
+    document.getElementById("gameOverScreen").appendChild(scoreText);
+
+    cancelAnimationFrame(gameLoopId); // Stop the game loop
+
+    // Poslanie skóre (úroveň) do deadwindow.html cez URL
+    window.location.href = "deadwindow.html?score=" + currentWave;
+}
+
+
+// Restart hry
+function restartGame() {
+    player = { x: canvas.width / 2, y: canvas.height / 2, size: 20, speed: 3, hp: 5, maxHp: 5 };
+    enemies = [];
+    bullets = [];
+    boss = null;
+    currentWave = 0;
+    waveInProgress = false;
+
+    document.getElementById("gameOverScreen").style.display = "none";
+
+    startNewWave();
+    gameLoop(); // Restart the game loop
+}
+
+// Návrat na domovskú stránku
+function goHome() {
+    window.location.href = "page.html";
 }
 
 window.addEventListener("keydown", (e) => keys[e.key] = true);
