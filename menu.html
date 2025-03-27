@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="sk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herné Menu</title>
+    <link rel="stylesheet" href="menu.css">
+</head>
+
+<body>
+    <div class="stars"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const starsContainer = document.querySelector(".stars");
+
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement("div");
+                star.classList.add("star");
+
+                const starTailLength = Math.random() * (7.5 - 5) + 5;
+                const topOffset = Math.random() * 100;
+                const fallDuration = Math.random() * (12 - 6) + 6;
+                const fallDelay = Math.random() * 10;
+
+                star.style.setProperty("--star-tail-length", `${starTailLength}em`);
+                star.style.setProperty("--top-offset", `${topOffset}vh`);
+                star.style.setProperty("--fall-duration", `${fallDuration}s`);
+                star.style.setProperty("--fall-delay", `${fallDelay}s`);
+
+                starsContainer.appendChild(star);
+            }
+        });
+    </script>
+
+    
+    <div class="mode">
+        <h1>Vyber si obtiažnosť</h1>
+        <button class="menu-button" onclick="startGame('normal')">Normal Mode</button>
+        <button class="menu-button" onclick="startGame('hard')">Hardmode</button>
+        <button class="menu-button" onclick="startGame('horde')">Hordemode</button>
+        <a href="./page.html" class="menu-button">HOME</a>
+    </div>
+
+    <script>
+        function startGame(mode) {
+            localStorage.setItem("gameMode", mode);
+            window.location.href = "index.html"; // Otvorí hru
+        }
+    </script>
+</body>
+
+</html>

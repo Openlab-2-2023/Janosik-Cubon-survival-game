@@ -105,7 +105,6 @@ function moveEnemies() {
     }
 }
 
-// Generovanie nepriateľov a bossa
 function startNewWave() {
     if (waveInProgress) return;
 
@@ -114,11 +113,21 @@ function startNewWave() {
     enemies = [];
 
     let enemyCount = Math.floor(currentWave * 1.5);
+    let safeDistance = 200; // Bezpečný radius pre všetkých nepriateľov
+
     for (let i = 0; i < enemyCount; i++) {
         let type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+        let spawnX, spawnY;
+
+        // Kontrola, aby nepriatelia neboli príliš blízko hráča
+        do {
+            spawnX = Math.random() * canvas.width;
+            spawnY = Math.random() * canvas.height;
+        } while (Math.sqrt((spawnX - player.x) ** 2 + (spawnY - player.y) ** 2) < safeDistance);
+
         enemies.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
+            x: spawnX,
+            y: spawnY,
             size: 20,
             speed: type.speed,
             hp: type.hp,
@@ -126,10 +135,17 @@ function startNewWave() {
         });
     }
 
+    // Boss sa spawnuje každých 10 vĺn
     if (currentWave % 10 === 0) {
+        let bossX, bossY;
+        do {
+            bossX = Math.random() * canvas.width;
+            bossY = Math.random() * canvas.height;
+        } while (Math.sqrt((bossX - player.x) ** 2 + (bossY - player.y) ** 2) < safeDistance);
+
         boss = {
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
+            x: bossX,
+            y: bossY,
             size: 40,
             speed: bossType.speed,
             hp: bossType.hp,
@@ -139,6 +155,7 @@ function startNewWave() {
 
     waveInProgress = false;
 }
+
 
 // Streľba
 function shootBullet(event) {
@@ -200,7 +217,7 @@ function draw() {
         drawHpBar(boss.x, boss.y - 20, 100, boss.hp, 10);
     }
 
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "yellow";
     bullets.forEach(bullet => ctx.fillRect(bullet.x, bullet.y, bullet.size, bullet.size));
 
     drawWaveText();

@@ -79,19 +79,20 @@ body {
     }
 }
 
-
-.button-container {
+.mode {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100px;
     gap: 30px;
-    color: white    ;
+    color: white;
 }
 
 
-.page-button {
+
+
+.menu-button {
     width: 200px;
     padding: 0.6em 2em;
     border: none;
@@ -115,14 +116,14 @@ body {
 }
 
 
-.page-button:hover {
+.menu-button:hover {
     background: #333;
     transform: scale(1.1);
     
 }
 
 
-.page-button:before {
+.menu-button:before {
     content: "";
     background: linear-gradient(45deg,
             #ff0000,
@@ -164,7 +165,7 @@ body {
 }
 
 
-.page-button:after {
+.menu-button:after {
     z-index: -1;
     content: "";
     position: absolute;
@@ -181,5 +182,3 @@ body {
         color: white;
     }
 }
-
-
