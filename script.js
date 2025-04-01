@@ -223,7 +223,7 @@ function draw() {
         drawHpBar(enemy.x, enemy.y - 20, 50, enemy.hp, 3);
     });
 
-    // Vykreslenie bossa
+   
     if (boss) {
         ctx.fillStyle = boss.color;
         ctx.fillRect(boss.x, boss.y, boss.size, boss.size);
@@ -231,7 +231,7 @@ function draw() {
     }
 
     // Vykreslenie nábojov
-    ctx.fillStyle = "yellow";
+    ctx.fillStyle = "red";
     bullets.forEach(bullet => ctx.fillRect(bullet.x, bullet.y, bullet.size, bullet.size));
 
     drawWaveText();
