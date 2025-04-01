@@ -13,6 +13,10 @@ const hpText = document.getElementById("hpText");
 const gameOverScreen = document.getElementById("gameOverScreen");
 const finalWaveText = document.getElementById("finalWave");
 
+// Načítanie obrázka postavičky
+let playerImage = new Image();
+playerImage.src = "doom pixel.png";  // Uistite sa, že súbor player.png je v rovnakom priečinku
+
 // Hráč
 let player = { x: canvas.width / 2, y: canvas.height / 2, size: 20, speed: 3, hp: 5, maxHp: 5 };
 
@@ -23,6 +27,20 @@ const enemyTypes = [
     { speed: 2.5, hp: 1, color: "purple" },
     { speed: 1, hp: 3, color: "darkred" }
 ];
+// Načítanie obrázkov pre nepriateľov
+const enemyImages = {
+    red: new Image(),
+    purple: new Image(),
+    darkred: new Image(),
+    boss: new Image()
+};
+
+// Cesty k obrázkom (uprav podľa tvojich súborov)
+enemyImages.red.src = "img/enemy_red.png";
+enemyImages.purple.src = "baron of hell pixel.png";
+enemyImages.darkred.src = "img/enemy_darkred.png";
+enemyImages.boss.src = "img/boss.png"; // Ak máš obrázok bossa
+
 
 // Boss
 let boss = null;
@@ -76,9 +94,7 @@ function moveEnemies() {
         if (Math.abs(player.x - enemy.x) < player.size && Math.abs(player.y - enemy.y) < player.size) {
             player.hp = Math.max(0, player.hp - 1); // Neumrie hneď, len stratí HP
             player.hp = 0;
-            // hpText.innerText = "HP: " + player.hp;
 
-            // Ukoncenie hry
             if (player.hp <= 0) {
                 endGame();
             }
@@ -113,13 +129,12 @@ function startNewWave() {
     enemies = [];
 
     let enemyCount = Math.floor(currentWave * 1.5);
-    let safeDistance = 200; // Bezpečný radius pre všetkých nepriateľov
+    let safeDistance = 200; // Bezpečný radius pre nepriateľov
 
     for (let i = 0; i < enemyCount; i++) {
         let type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
         let spawnX, spawnY;
 
-        // Kontrola, aby nepriatelia neboli príliš blízko hráča
         do {
             spawnX = Math.random() * canvas.width;
             spawnY = Math.random() * canvas.height;
@@ -135,7 +150,6 @@ function startNewWave() {
         });
     }
 
-    // Boss sa spawnuje každých 10 vĺn
     if (currentWave % 10 === 0) {
         let bossX, bossY;
         do {
@@ -156,8 +170,6 @@ function startNewWave() {
     waveInProgress = false;
 }
 
-
-// Streľba
 function shootBullet(event) {
     let rect = canvas.getBoundingClientRect();
     let mouseX = event.clientX - rect.left;
@@ -175,7 +187,6 @@ function shootBullet(event) {
     });
 }
 
-// Pohyb guľky a kolízie
 function moveBullets() {
     bullets.forEach((bullet, bulletIndex) => {
         bullet.x += bullet.dx;
@@ -197,33 +208,35 @@ function moveBullets() {
     });
 }
 
-// Vykreslenie
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "blue";
-    ctx.fillRect(player.x, player.y, player.size, player.size);
-    drawHpBar(player.x, player.y - 20, 100, player.hp, player.maxHp);
+    // Zväčšenie obrázka hráča (napr. na 40x40 pixelov)
+    ctx.drawImage(playerImage, player.x, player.y, 50, 50);
 
+    drawHpBar(player.x, player.y - 20, 100, player.hp, player.maxHp);
+    
+    // Vykreslenie nepriateľov
     enemies.forEach(enemy => {
         ctx.fillStyle = enemy.color;
         ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
         drawHpBar(enemy.x, enemy.y - 20, 50, enemy.hp, 3);
     });
 
+    // Vykreslenie bossa
     if (boss) {
         ctx.fillStyle = boss.color;
         ctx.fillRect(boss.x, boss.y, boss.size, boss.size);
         drawHpBar(boss.x, boss.y - 20, 100, boss.hp, 10);
     }
 
+    // Vykreslenie nábojov
     ctx.fillStyle = "yellow";
     bullets.forEach(bullet => ctx.fillRect(bullet.x, bullet.y, bullet.size, bullet.size));
 
     drawWaveText();
 }
 
-// Herná slučka
 let gameLoopId;
 
 function gameLoop() {
@@ -239,13 +252,11 @@ function gameLoop() {
     gameLoopId = requestAnimationFrame(gameLoop);
 }
 
-// Koniec hry
 function endGame() {
     enemies = [];
     document.getElementById("gameOverScreen").style.display = "block";
     finalWaveText.innerText = currentWave;
 
-    // Vyhodnotenie skóre
     let scoreMessage = "";
     if (currentWave < 5) {
         scoreMessage = "To je slabé, skúste znova!";
@@ -255,19 +266,14 @@ function endGame() {
         scoreMessage = "Skvelé, pokračujte v práci!";
     }
 
-    // Zobrazenie hodnotenia
     const scoreText = document.createElement('p');
     scoreText.innerText = "Úroveň: " + currentWave + " - " + scoreMessage;
     document.getElementById("gameOverScreen").appendChild(scoreText);
 
-    cancelAnimationFrame(gameLoopId); // Stop the game loop
-
-    // Poslanie skóre (úroveň) do deadwindow.html cez URL
+    cancelAnimationFrame(gameLoopId);
     window.location.href = "deadwindow.html?score=" + currentWave;
 }
 
-
-// Restart hry
 function restartGame() {
     player = { x: canvas.width / 2, y: canvas.height / 2, size: 20, speed: 3, hp: 5, maxHp: 5 };
     enemies = [];
@@ -279,10 +285,9 @@ function restartGame() {
     document.getElementById("gameOverScreen").style.display = "none";
 
     startNewWave();
-    gameLoop(); // Restart the game loop
+    gameLoop();
 }
 
-// Návrat na domovskú stránku
 function goHome() {
     window.location.href = "page.html";
 }
