@@ -6,7 +6,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skóre</title>
     <link rel="stylesheet" href="page.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0a0a0a;
+            color: white;
+            text-align: center;
+        }
 
+        .score-box {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ee1e0f;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 20px;
+            box-shadow: 0 0 15px #ff8d02;
+        }
+
+        .score-box h2 {
+            margin: 0;
+            color: #4CAF50;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .page-button {
+            display: inline-block;
+            padding: 10px 20px;
+            color: white;
+            background-color: #4CAF50;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .page-button:hover {
+            background-color: #45a049;
+        }
+
+        
+
+    </style>
 </head>
 
 <body>
@@ -14,18 +57,21 @@
 
     <div id="wrapper">
         <h1>Game Over</h1>
-        <p id="scoreMessage"></p>
-
-        <div class="button-container">
+        <div class="score-box">
+            <h2>Vaše skóre</h2>
+            <p id="scoreMessage"></p>
             <a href="./index.html" class="page-button">PLAY AGAIN</a>
             <a href="./page.html" class="page-button">MENU</a>
         </div>
     </div>
 
-
     <script>
+
         document.addEventListener("DOMContentLoaded", () => {
             const starsContainer = document.querySelector(".stars");
+            const music = document.getElementById("background-music");
+            const musicButton = document.getElementById("music-toggle");
+            const musicIcon = document.getElementById("music-icon");
 
             for (let i = 0; i < 50; i++) {
                 const star = document.createElement("div");
@@ -44,17 +90,25 @@
                 starsContainer.appendChild(star);
             }
 
+            musicButton.addEventListener("click", () => {
+                if (music.paused) {
+                    music.play();
+                    musicIcon.src = "images/soundoff.png";
+                } else {
+                    music.pause();
+                    musicIcon.src = "images/soundon.jpg";
+                }
+            });
+        });
 
-            // Funkcia na získanie query parametra zo URL
+
+        document.addEventListener("DOMContentLoaded", () => {
             function getQueryParameter(name) {
                 const urlParams = new URLSearchParams(window.location.search);
                 return urlParams.get(name);
             }
 
-            // Získanie skóre z query parametra
             const score = getQueryParameter('score');
-
-            // Zobrazenie skóre
             if (score) {
                 let message = "";
                 if (score < 5) {
@@ -64,15 +118,12 @@
                 } else {
                     message = "Skvelé, pokračujte v práci!";
                 }
-
-                // Zobraziť skóre a hodnotenie
                 document.getElementById("scoreMessage").innerText = "Úroveň: " + score + " - " + message;
             } else {
                 document.getElementById("scoreMessage").innerText = "No score found.";
             }
         });
     </script>
-
 </body>
 
 </html>
