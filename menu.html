@@ -33,7 +33,7 @@
         });
     </script>
 
-    
+
     <div class="mode">
         <h1>Vyber si obtiažnosť</h1>
         <button class="menu-button" onclick="startGame('normal')">Normal Mode</button>
@@ -48,6 +48,52 @@
             window.location.href = "index.html"; // Otvorí hru
         }
     </script>
+
+    <audio id="background-music" loop>
+        <source src="02. Cultist Base.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <button id="music-toggle" class="music-button">
+        <img id="music-icon" src="images/soundoff.png" alt="Music Icon" width="30">
+    </button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const starsContainer = document.querySelector(".stars");
+            const music = document.getElementById("background-music");
+            const musicButton = document.getElementById("music-toggle");
+            const musicIcon = document.getElementById("music-icon");
+
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement("div");
+                star.classList.add("star");
+
+                const starTailLength = Math.random() * (7.5 - 5) + 5;
+                const topOffset = Math.random() * 100;
+                const fallDuration = Math.random() * (12 - 6) + 6;
+                const fallDelay = Math.random() * 10;
+
+                star.style.setProperty("--star-tail-length", `${starTailLength}em`);
+                star.style.setProperty("--top-offset", `${topOffset}vh`);
+                star.style.setProperty("--fall-duration", `${fallDuration}s`);
+                star.style.setProperty("--fall-delay", `${fallDelay}s`);
+
+                starsContainer.appendChild(star);
+            }
+
+            musicButton.addEventListener("click", () => {
+                if (music.paused) {
+                    music.play();
+                    musicIcon.src = "images/soundoff.png";
+                } else {
+                    music.pause();
+                    musicIcon.src = "images/soundon.jpg";
+                }
+            });
+        });
+    </script>
+
 </body>
 
 </html>

@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survival Game</title>
     <link rel="stylesheet" href="page.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -24,7 +23,7 @@
     </audio>
 
     <button id="music-toggle" class="music-button">
-        <i id="music-icon" class="fas fa-volume-up"></i>
+        <img id="music-icon" src="images/soundoff.png" alt="Music Icon" width="30">
     </button>
 
     <script>
@@ -54,13 +53,15 @@
             musicButton.addEventListener("click", () => {
                 if (music.paused) {
                     music.play();
-                    musicIcon.classList.replace("fa-volume-mute", "fa-volume-up");
+                    musicIcon.src = "images/soundoff.png";
                 } else {
                     music.pause();
-                    musicIcon.classList.replace("fa-volume-up", "fa-volume-mute");
+                    musicIcon.src = "images/soundon.jpg";
                 }
             });
         });
+    
+        
     </script>
 
 </body>
