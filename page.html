@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survival Game</title>
     <link rel="stylesheet" href="page.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -16,10 +17,22 @@
         <a href="./menu.html" class="page-button">MENU</a>
         <a href="./rules.html" class="page-button">RULES-COMING SOON</a>
     </div>
-    
+
+    <audio id="background-music" loop>
+        <source src="02. Cultist Base.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <button id="music-toggle" class="music-button">
+        <i id="music-icon" class="fas fa-volume-up"></i>
+    </button>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const starsContainer = document.querySelector(".stars");
+            const music = document.getElementById("background-music");
+            const musicButton = document.getElementById("music-toggle");
+            const musicIcon = document.getElementById("music-icon");
 
             for (let i = 0; i < 50; i++) {
                 const star = document.createElement("div");
@@ -37,8 +50,19 @@
 
                 starsContainer.appendChild(star);
             }
+
+            musicButton.addEventListener("click", () => {
+                if (music.paused) {
+                    music.play();
+                    musicIcon.classList.replace("fa-volume-mute", "fa-volume-up");
+                } else {
+                    music.pause();
+                    musicIcon.classList.replace("fa-volume-up", "fa-volume-mute");
+                }
+            });
         });
     </script>
+
 </body>
 
 </html>
