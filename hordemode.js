@@ -91,9 +91,10 @@ function moveEnemies() {
             enemy.y += (dy / distance) * enemy.speed;
         }
 
+        // KONTROLA KOLÍZIE S BEŽNÝM NEPŘÍTEĽOM
         if (Math.abs(player.x - enemy.x) < player.size && Math.abs(player.y - enemy.y) < player.size) {
-            player.hp = Math.max(0, player.hp - 1); // Neumrie hneď, len stratí HP
-            player.hp = 0;
+            player.hp = Math.max(0, player.hp - 0.05); // Odoberie sa 0.5 HP
+            hpText.innerText = "HP: " + Math.ceil(player.hp);
 
             if (player.hp <= 0) {
                 endGame();
@@ -110,9 +111,10 @@ function moveEnemies() {
             boss.y += (dy / distance) * boss.speed;
         }
 
+        // KONTROLA KOLÍZIE S BOSSOM
         if (Math.abs(player.x - boss.x) < player.size && Math.abs(player.y - boss.y) < player.size) {
             player.hp = Math.max(0, player.hp - 2); // Boss berie viac HP
-            hpText.innerText = "HP: " + player.hp;
+            hpText.innerText = "HP: " + Math.ceil(player.hp);
 
             if (player.hp <= 0) {
                 endGame();
@@ -128,17 +130,19 @@ function startNewWave() {
     currentWave++;
     enemies = [];
 
-    let enemyCount = Math.floor(currentWave * 1.5);
-    let safeDistance = 200; // Bezpečný radius pre nepriateľov
+    const enemyCount = 5 + currentWave * 5;
+    console.log("Spúšťa sa vlna " + currentWave + ", počet nepriateľov: " + enemyCount);
+
+    const safeDistance = 150;
 
     for (let i = 0; i < enemyCount; i++) {
-        let type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+        const type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
         let spawnX, spawnY;
 
         do {
             spawnX = Math.random() * canvas.width;
             spawnY = Math.random() * canvas.height;
-        } while (Math.sqrt((spawnX - player.x) ** 2 + (spawnY - player.y) ** 2) < safeDistance);
+        } while (Math.hypot(spawnX - player.x, spawnY - player.y) < safeDistance);
 
         enemies.push({
             x: spawnX,
@@ -151,23 +155,34 @@ function startNewWave() {
     }
 
     if (currentWave % 10 === 0) {
-        let bossX, bossY;
-        do {
-            bossX = Math.random() * canvas.width;
-            bossY = Math.random() * canvas.height;
-        } while (Math.sqrt((bossX - player.x) ** 2 + (bossY - player.y) ** 2) < safeDistance);
-
         boss = {
-            x: bossX,
-            y: bossY,
-            size: 40,
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: 50,
             speed: bossType.speed,
             hp: bossType.hp,
             color: bossType.color
         };
+        console.log("Boss bol pridaný!");
     }
 
     waveInProgress = false;
+}
+
+
+
+function gameLoop() {
+    movePlayer();
+    moveEnemies();
+    moveBullets();
+    draw();
+
+    if (enemies.length === 0 && !boss) {
+        console.log("Všetci nepriatelia porazení, spúšťam novú vlnu."); // Overenie podmienky
+        startNewWave();
+    }
+
+    gameLoopId = requestAnimationFrame(gameLoop);
 }
 
 function shootBullet(event) {
@@ -235,22 +250,13 @@ function draw() {
     bullets.forEach(bullet => ctx.fillRect(bullet.x, bullet.y, bullet.size, bullet.size));
 
     drawWaveText();
+
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.fillText("Počet nepriateľov: " + enemies.length, 10, 60);
+
 }
 
-let gameLoopId;
-
-function gameLoop() {
-    movePlayer();
-    moveEnemies();
-    moveBullets();
-    draw();
-
-    if (enemies.length === 0 && !boss) {
-        startNewWave();
-    }
-
-    gameLoopId = requestAnimationFrame(gameLoop);
-}
 
 function endGame() {
     enemies = [];

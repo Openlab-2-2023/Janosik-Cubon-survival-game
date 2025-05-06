@@ -126,10 +126,15 @@ function startNewWave() {
 
     waveInProgress = true;
     currentWave++;
+    console.log("Začína sa nová vlna!"); // Kontrola volania funkcie
+    console.log("Aktuálna vlna:", currentWave); // Kontrola čísla vlny
     enemies = [];
 
-    let enemyCount = Math.floor(currentWave * 1.5);
-    let safeDistance = 200; // Bezpečný radius pre nepriateľov
+    let initialEnemyCount = 50; // Výrazne zvýšený počiatočný počet
+    let enemyCount = initialEnemyCount * Math.pow(4, currentWave - 1);
+    console.log("Počet nepriateľov na spawnovanie:", enemyCount); // Kontrola vypočítaného počtu
+
+    let safeDistance = 200;
 
     for (let i = 0; i < enemyCount; i++) {
         let type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
@@ -151,20 +156,7 @@ function startNewWave() {
     }
 
     if (currentWave % 10 === 0) {
-        let bossX, bossY;
-        do {
-            bossX = Math.random() * canvas.width;
-            bossY = Math.random() * canvas.height;
-        } while (Math.sqrt((bossX - player.x) ** 2 + (bossY - player.y) ** 2) < safeDistance);
-
-        boss = {
-            x: bossX,
-            y: bossY,
-            size: 40,
-            speed: bossType.speed,
-            hp: bossType.hp,
-            color: bossType.color
-        };
+        // ... kód pre spawnovanie bossa ...
     }
 
     waveInProgress = false;

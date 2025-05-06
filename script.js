@@ -91,9 +91,10 @@ function moveEnemies() {
             enemy.y += (dy / distance) * enemy.speed;
         }
 
+        // KONTROLA KOLÍZIE S BEŽNÝM NEPŘÍTEĽOM
         if (Math.abs(player.x - enemy.x) < player.size && Math.abs(player.y - enemy.y) < player.size) {
-            player.hp = Math.max(0, player.hp - 1); // Neumrie hneď, len stratí HP
-            player.hp = 0;
+            player.hp = Math.max(0, player.hp - 0.05); // Odoberie sa 0.5 HP
+            hpText.innerText = "HP: " + Math.ceil(player.hp);
 
             if (player.hp <= 0) {
                 endGame();
@@ -110,9 +111,10 @@ function moveEnemies() {
             boss.y += (dy / distance) * boss.speed;
         }
 
+        // KONTROLA KOLÍZIE S BOSSOM
         if (Math.abs(player.x - boss.x) < player.size && Math.abs(player.y - boss.y) < player.size) {
             player.hp = Math.max(0, player.hp - 2); // Boss berie viac HP
-            hpText.innerText = "HP: " + player.hp;
+            hpText.innerText = "HP: " + Math.ceil(player.hp);
 
             if (player.hp <= 0) {
                 endGame();
