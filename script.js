@@ -15,7 +15,7 @@ const finalWaveText = document.getElementById("finalWave");
 
 // Načítanie obrázka postavičky
 let playerImage = new Image();
-playerImage.src = "doom pixel.png";  // Uistite sa, že súbor player.png je v rovnakom priečinku
+playerImage.src = "images/doom pixel.png";  // Uistite sa, že súbor player.png je v rovnakom priečinku
 
 // Hráč
 let player = { x: canvas.width / 2, y: canvas.height / 2, size: 20, speed: 3, hp: 5, maxHp: 5 };
@@ -40,6 +40,7 @@ enemyImages.red.src = "img/enemy_red.png";
 enemyImages.purple.src = "baron of hell pixel.png";
 enemyImages.darkred.src = "img/enemy_darkred.png";
 enemyImages.boss.src = "img/boss.png"; // Ak máš obrázok bossa
+
 
 
 // Boss
@@ -291,6 +292,8 @@ function restartGame() {
 function goHome() {
     window.location.href = "page.html";
 }
+
+
 
 window.addEventListener("keydown", (e) => keys[e.key] = true);
 window.addEventListener("keyup", (e) => keys[e.key] = false);
