@@ -18,7 +18,20 @@ h1 {
     border: 4px solid rgb(255, 191, 0);
     background-color: #000;
     box-shadow: 0 0 10px rgba(255, 8, 0, 0.838);
-  }
+}
+
+h3 {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 32px;
+    text-transform: uppercase;
+    color: rgb(255, 115, 0);
+    text-shadow: 2px 2px 0 #000, 4px 4px 0 rgb(184, 53, 5);
+    letter-spacing: 2px;
+    padding: 20px;
+    border: 4px solid rgb(255, 191, 0);
+    background-color: #000;
+    box-shadow: 0 0 10px rgba(255, 8, 0, 0.838);
+}
 
 .stars {
     position: fixed;
@@ -43,7 +56,8 @@ h1 {
     animation: fall var(--fall-duration) var(--fall-delay) linear infinite, tail-fade var(--fall-duration) var(--fall-delay) ease-out infinite;
 }
 
-.star::before, .star::after {
+.star::before,
+.star::after {
     position: absolute;
     content: '';
     top: 0;
@@ -70,12 +84,15 @@ h1 {
 }
 
 @keyframes tail-fade {
-    0%, 50% {
+
+    0%,
+    50% {
         width: var(--star-tail-length);
         opacity: 1;
     }
 
-    70%, 80% {
+    70%,
+    80% {
         width: 0;
         opacity: 0.4;
     }
@@ -100,7 +117,7 @@ h1 {
     justify-content: center;
     height: 100px;
     gap: 30px;
-    color: white    ;
+    color: white;
 }
 
 .page-button {
@@ -121,22 +138,24 @@ h1 {
     border-radius: 0;
     z-index: 1;
     position: relative;
-  }
+}
 
-  .page-button:hover {
+.page-button:hover {
     background-color: #ff4d4d;
     transform: translate(-2px, -2px);
     box-shadow: 0 0 0 4px #000, 6px 6px 0 #000;
-  }
+}
 
-  .page-button:active {
+.page-button:active {
     background-color: #cc0000;
     transform: translate(2px, 2px);
     box-shadow: 0 0 0 4px #000, 2px 2px 0 #000;
-  }
+}
 
 #wrapper {
-    #scoreMessage, h1 {
+
+    #scoreMessage,
+    h1 {
         color: white;
     }
 
@@ -162,4 +181,22 @@ h1 {
     height: 60px;
 }
 
+.score-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 2rem;
+    border: 4px solid rgb(255, 6, 6);
+    border-radius: 10px;
+    z-index: 1;
+    text-align: center;
+    max-width: 90%;
+    margin-top: -100px;
+    font-family: 'Press Start 2P', cursive;
+}
 
+.score-box h2 {
+    font-size: 1rem;
+}
