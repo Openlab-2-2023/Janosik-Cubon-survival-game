@@ -20,13 +20,12 @@ playerImage.src = "doom pixel.png";  // Uistite sa, že súbor player.png je v r
 // Hráč
 let player = { x: canvas.width / 2, y: canvas.height / 2, size: 20, speed: 3, hp: 5, maxHp: 5 };
 
-// Nepriatelia
-let enemies = [];
 const enemyTypes = [
-    { speed: 1.5, hp: 1, color: "red" },
-    { speed: 2.5, hp: 1, color: "purple" },
-    { speed: 1, hp: 3, color: "darkred" }
+    { speed: 1.5, hp: 1, color: "red", damage: 0.2 }, // Červený uberá 0.2 HP
+    { speed: 2.5, hp: 1, color: "purple", damage: 0.5 }, // Fialový uberá 0.5 HP
+    { speed: 1, hp: 3, color: "darkred", damage: 1 }, // Tmavý červený uberá 1 HP
 ];
+
 // Načítanie obrázkov pre nepriateľov
 const enemyImages = {
     red: new Image(),
@@ -44,7 +43,7 @@ enemyImages.boss.src = "img/boss.png"; // Ak máš obrázok bossa
 
 // Boss
 let boss = null;
-const bossType = { speed: 1, hp: 10, color: "orange" };
+const bossType = { speed: 1, hp: 10, color: "orange", damage: 3 }; // Boss uberá 3 HP
 
 let bullets = [];
 let keys = {};
