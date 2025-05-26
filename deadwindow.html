@@ -7,6 +7,7 @@
     <title>Skóre</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="page.css">
+
 </head>
 
 <body>
@@ -23,6 +24,7 @@
             <a href="./menu.html" class="page-button">MENU</a>
         </div>
     </div>
+
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -45,16 +47,17 @@
                 starsContainer.appendChild(star);
             }
 
-            // Function to get query parameter from URL
+
+            // Funkcia na získanie query parametra zo URL
             function getQueryParameter(name) {
                 const urlParams = new URLSearchParams(window.location.search);
                 return urlParams.get(name);
             }
 
-            // Get score from query parameter
+            // Získanie skóre z query parametra
             const score = getQueryParameter('score');
 
-            // Display score
+            // Zobrazenie skóre
             if (score) {
                 let message = "";
                 if (score < 5) {
@@ -65,13 +68,14 @@
                     message = "Skvelé, pokračujte v práci!";
                 }
 
-                // Display score and evaluation
+                // Zobraziť skóre a hodnotenie
                 document.getElementById("scoreMessage").innerText = "Úroveň: " + score + " - " + message;
             } else {
                 document.getElementById("scoreMessage").innerText = "No score found.";
             }
         });
     </script>
+
 </body>
 
 </html>
