@@ -94,7 +94,7 @@ let gameStarted = false; // Nová premenná na sledovanie, či sa hra už začal
 
 // Načítanie obrázka pozadia - NOVINKA
 let backgroundImage = new Image();
-backgroundImage.src = "images/background.jpg"; // UISTI SA, ŽE TENTO SÚBOR EXISTUJE A JE NA TEJTO CESTE!
+backgroundImage.src = "images/background..png"; // UISTI SA, ŽE TENTO SÚBOR EXISTUJE A JE NA TEJTO CESTE!
 let backgroundLoaded = false;
 
 backgroundImage.onload = () => {
