@@ -40,13 +40,13 @@
         <button class="menu-button" onclick="startGame('normal')">Normal Mode</button>
         <button class="menu-button" onclick="startGame('horde')">Horde Mode</button>
         <button class="menu-button" onclick="startGame('death')">Death Mode</button>
-        <a href="./page.html" class="menu-button">HOME</a>
+        <a href="./index.html" class="menu-button">HOME</a>
     </div>
 
     <script>
         function startGame(mode) {
             localStorage.setItem("gameMode", mode);
-            window.location.href = "index.html"; // Otvorí hru
+            window.location.href = "page.html"; // Otvorí hru
         }
     </script>
 
