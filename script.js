@@ -1,11 +1,18 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-const ammoText = document.getElementById("ammoText");
+
+// Referencie na HTML UI elementy
 const hpText = document.getElementById("hpText");
-const gameOverScreen = document.getElementById("gameOverScreen");
-const finalWaveText = document.getElementById("finalWave");
-const restartButton = document.getElementById("restartGameButton");
-const homeButton = document.getElementById("goHomeButton");
+const ammoText = document.getElementById("ammoText");
+const waveText = document.getElementById("waveText");     // NOVÉ: pre zobrazenie vlny
+const weaponText = document.getElementById("weaponText"); // NOVÉ: pre zobrazenie zbrane
+
+// Tieto riadky sú teraz pre Game Over obrazovku ZBYTOČNÉ, ak presmerúvaš na novú stránku
+// const gameOverScreen = document.getElementById("gameOverScreen");
+// const finalWaveText = document.getElementById("finalWave");
+// const restartButton = document.getElementById("restartGameButton");
+// const homeButton = document.getElementById("goHomeButton");
+
 
 // Zabezpečenie, že kontext canvasu je dostupný
 if (!ctx) {
@@ -13,7 +20,7 @@ if (!ctx) {
     alert("Chyba: Nepodarilo sa inicializovať hru. Váš prehliadač možno nepodporuje Canvas.");
 }
 
-// --- Nastavenia hry podľa módu obtiažnosti (PRESNUTÉ SEM HORE) ---
+// --- Nastavenia hry podľa módu obtiažnosti ---
 let gameMode = localStorage.getItem("gameMode") || "normal"; // Načítaj mód, predvolene 'normal'
 
 let playerInitialHp;
@@ -62,10 +69,10 @@ switch (gameMode) {
         break;
 }
 
-// Hráč - inicializácia s hodnotami z módu (PRESNUTÉ SEM HORE, TERAZ EXISTUJE PRED resizeCanvas)
+// Hráč - inicializácia s hodnotami z módu
 let player = {
-    x: canvas.width / 2, // Predbežná hodnota, bude prepočítaná v resizeCanvas
-    y: canvas.height / 2, // Predbežná hodnota, bude prepočítaná v resizeCanvas
+    x: canvas.width / 2,
+    y: canvas.height / 2,
     size: 50, // Nastav veľkosť hráča, aby zodpovedala obrázku
     speed: playerSpeed,
     hp: playerInitialHp,
@@ -78,8 +85,6 @@ let player = {
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    // Po zmene veľkosti canvasu je dobré premiestniť hráča do stredu
-    // Teraz je objekt 'player' už definovaný, takže k nemu môžeme pristupovať
     player.x = canvas.width / 2 - player.size / 2;
     player.y = canvas.height / 2 - player.size / 2;
 }
@@ -93,9 +98,11 @@ let gameStarted = false; // Nová premenná na sledovanie, či sa hra už začal
 
 playerImage.onload = () => {
     // Až po načítaní obrázka môžeme začať hernú slučku
-    // Aby sa predišlo vykresľovaniu "prázdneho" hráča
     if (!gameStarted) {
-        startNewWave(); // Spusti prvú vlnu
+        startNewWave(); // Spusti prvú vlnu (teraz volá updateWaveDisplay v sebe)
+        updateAmmoDisplay(); // Inicializuj zobrazenie munície
+        updateHpDisplay();   // Inicializuj zobrazenie HP
+        updateWeaponDisplay(); // Inicializuj zobrazenie zbrane
         gameLoop(); // Spusti hlavnú hernú slučku
         gameStarted = true;
         console.log("Hra spustená po načítaní obrázka hráča.");
@@ -106,6 +113,9 @@ playerImage.onerror = () => {
     // V prípade chyby načítania obrázka, aspoň spustiť hru s placeholderom
     if (!gameStarted) {
         startNewWave();
+        updateAmmoDisplay();
+        updateHpDisplay();
+        updateWeaponDisplay();
         gameLoop();
         gameStarted = true;
     }
@@ -132,7 +142,7 @@ enemyTypes.forEach(type => {
         console.warn("Nepodarilo sa načítať obrázok pre " + type.name + ": " + type.image + ". Použije sa farba.");
     };
 });
-*/ // Koniec zakomentovaného bloku
+*/
 
 // Boss
 let boss = null;
@@ -147,7 +157,7 @@ bossImage.src = bossType.image; // Pôvodný riadok, teraz zakomentovaný/vyprá
 bossImage.onerror = () => {
     console.warn("Nepodarilo sa načítať obrázok bossa: " + bossType.image + ". Použije sa farba.");
 };
-*/ // Koniec upraveného bloku
+*/
 
 let enemies = [];
 let bullets = [];
@@ -220,20 +230,31 @@ function drawHpBar(x, y, width, hp, maxHp) {
     ctx.strokeRect(x, y, width, barHeight);
 }
 
-// Zobrazenie vlny a zbrane
-function drawWaveAndWeaponText() {
-    ctx.fillStyle = '#fff';
-    ctx.font = '24px Arial'; // Väčší font
-    ctx.fillText('Vlna: ' + currentWave, 10, 30);
-    ctx.fillText('Zbraň: ' + currentWeapon.name, 10, 60);
+// Funkcie na aktualizáciu HTML UI elementov
+function updateHpDisplay() {
+    if (hpText) {
+        hpText.innerText = "HP: " + Math.ceil(player.hp);
+    }
 }
 
-// Funkcia na aktualizáciu zobrazenia munície
 function updateAmmoDisplay() {
-    if (ammoText) { // Kontrola, či element existuje
+    if (ammoText) {
         ammoText.innerText = `Munícia: ${player.ammo}/${player.maxAmmo}`;
     }
 }
+
+function updateWaveDisplay() {
+    if (waveText) {
+        waveText.innerText = `Vlna: ${currentWave}`;
+    }
+}
+
+function updateWeaponDisplay() {
+    if (weaponText) {
+        weaponText.innerText = `Zbraň: ${currentWeapon.name}`;
+    }
+}
+
 
 // Pohyb hráča (WASD)
 function movePlayer() {
@@ -263,9 +284,7 @@ function moveEnemies() {
             player.y < enemy.y + enemy.size &&
             player.y + player.size > enemy.y) {
             player.hp = Math.max(0, player.hp - enemy.damage);
-            if (hpText) { // Kontrola, či element existuje
-                hpText.innerText = "HP: " + Math.ceil(player.hp);
-            }
+            updateHpDisplay(); // Aktualizuj zobrazenie HP
 
             if (player.hp <= 0) {
                 endGame();
@@ -289,9 +308,7 @@ function moveEnemies() {
             player.y + player.size > boss.y) {
             boss.hp -= boss.damage; // Boss by mal uberať HP nezávisle od globalDamageMultiplier
             player.hp = Math.max(0, player.hp - boss.damage);
-            if (hpText) { // Kontrola, či element existuje
-                hpText.innerText = "HP: " + Math.ceil(player.hp);
-            }
+            updateHpDisplay(); // Aktualizuj zobrazenie HP
 
             if (player.hp <= 0) {
                 endGame();
@@ -306,8 +323,10 @@ function startNewWave() {
     waveInProgress = true;
     currentWave++;
     console.log("Aktuálna vlna:", currentWave);
+    updateWaveDisplay(); // Aktualizuj vlnu v HTML
     enemies = []; // Vyčistí pole nepriateľov pre novú vlnu
-    powerUps = []; // Vyčistí power-upy na mape
+    
+    // powerUps = []; // ZAKOMENTOVANÉ: NEVYČISTÍ power-upy na mape medzi vlnami
 
     let enemyCount = Math.floor(currentWave * 1.5);
     if (gameMode === "horde") {
@@ -453,7 +472,7 @@ function moveBullets() {
                 if (enemy.hp <= 0) {
                     enemies.splice(j, 1);
                     // Šanca na vypadnutie power-upu
-                    if (Math.random() < 0.2) { // 20% šanca
+                    if (Math.random() < 0.5) { // 50% šanca
                         const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
                         powerUps.push({
                             x: enemy.x,
@@ -515,9 +534,7 @@ function checkPowerUpCollisions() {
                     break;
                 case "heal":
                     player.hp = Math.min(player.maxHp, player.hp + powerUp.value);
-                    if (hpText) {
-                        hpText.innerText = "HP: " + Math.ceil(player.hp);
-                    }
+                    updateHpDisplay();
                     console.log("Zobrané zdravie! Aktuálne HP: " + Math.ceil(player.hp));
                     break;
                 case "speed":
@@ -572,7 +589,7 @@ function draw() {
     // Vykreslenie nepriateľov (teraz vždy ako farebné štvorce, lebo obrázky nenačítavame)
     enemies.forEach(enemy => {
         // if (enemy.image && enemy.image.complete && enemy.image.naturalWidth !== 0) {
-        //     ctx.drawImage(enemy.image, enemy.x, enemy.y, enemy.size, enemy.size);
+        //     ctx.drawImage(enemy.image, enemy.y, enemy.y, enemy.size, enemy.size); // OPRAVENÉ: enemy.x
         // } else {
             ctx.fillStyle = enemy.color; // Použi definovanú farbu
             ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
@@ -608,7 +625,7 @@ function draw() {
         ctx.textAlign = "left"; // Reset pre ostatný text
     });
 
-    drawWaveAndWeaponText(); // Zobrazí číslo vlny a názov zbrane
+    // drawWaveAndWeaponText(); // TÚTO FUNKCIU UŽ NEVOLÁME, TEXTY SÚ V HTML
 }
 
 let gameLoopId; // ID pre requestAnimationFrame
@@ -629,70 +646,23 @@ function gameLoop() {
     gameLoopId = requestAnimationFrame(gameLoop);
 }
 
+// Funkcia volaná pri Game Over
 function endGame() {
     cancelAnimationFrame(gameLoopId); // Zastav hernú slučku
     console.log("KONIEC HRY! Hráč dosiahol 0 HP. Presmerujem na stránku so skóre.");
 
-    // Vyčisti herné objekty (toto je dobré urobiť aj pri presmerovaní)
+    // Vyčisti všetky herné objekty (toto je dôležité)
     enemies = [];
     bullets = [];
     powerUps = [];
     activePowerUps = [];
     boss = null;
 
-    // *** KĽÚČOVÁ ZMENA: Len presmeruj! ***
-    // Zabezpeč, aby 'deadwindow.html' bola správna cesta k tvojej stránke so skóre
-    window.location.href = "deadwindow.html?score=" + currentWave; 
+    // *** KĽÚČOVÁ ZMENA: Presmerovanie na externú stránku so skóre ***
+    // Uisti sa, že "deadwindow.html" je správna cesta k tvojej stránke so skóre
+    window.location.href = "deadwindow.html?score=" + currentWave;
 }
 
-// Funkcia na reštart hry (ak nechceš presmerovávať)
-function restartGame() {
-    // Skry obrazovku Game Over
-    if (gameOverScreen) {
-        gameOverScreen.style.display = "none";
-    }
-
-    // Reset hráča na počiatočné hodnoty módu
-    player = {
-        x: canvas.width / 2 - player.size / 2,
-        y: canvas.height / 2 - player.size / 2,
-        size: 50,
-        speed: playerSpeed, // Znovu nastaví podľa herného módu
-        hp: playerInitialHp, // Znovu nastaví podľa herného módu
-        maxHp: playerInitialHp,
-        ammo: 100,
-        maxAmmo: 100
-    };
-    enemies = [];
-    bullets = [];
-    powerUps = [];
-    activePowerUps = [];
-    boss = null;
-    currentWave = 0;
-    waveInProgress = false;
-    gameStarted = false; // Resetuj gameStarted, aby sa gameLoop spustil znova z playerImage.onload
-
-    updateAmmoDisplay(); // Aktualizuj muníciu
-    if (hpText) {
-        hpText.innerText = "HP: " + Math.ceil(player.hp); // Aktualizuj HP
-    }
-
-    // Znovu spusti hru (gameLoop sa spustí po načítaní obrázka, ak nie je už načítaný)
-    if (playerImage.complete && playerImage.naturalWidth !== 0) {
-        startNewWave();
-        gameLoop();
-        gameStarted = true;
-        console.log("Hra reštartovaná (obrázok hráča už načítaný).");
-    } else {
-        // Ak obrázok nie je načítaný, počkáme na jeho onload/onerror event
-        console.log("Reštartujem hru, čakám na načítanie obrázka hráča.");
-    }
-}
-
-
-function goHome() {
-    window.location.href = "page.html";
-}
 
 // Event Listenery
 window.addEventListener("keydown", (e) => {
@@ -703,32 +673,40 @@ window.addEventListener("keydown", (e) => {
         currentWeaponIndex = 0;
         currentWeapon = weapons[currentWeaponIndex];
         console.log("Vybraná zbraň: " + currentWeapon.name);
+        updateWeaponDisplay(); // AKTUALIZUJ ZBRAŇ V HTML
     } else if (e.code === "Digit2") {
         currentWeaponIndex = 1;
         currentWeapon = weapons[currentWeaponIndex];
         console.log("Vybraná zbraň: " + currentWeapon.name);
+        updateWeaponDisplay(); // AKTUALIZUJ ZBRAŇ V HTML
     } else if (e.code === "Digit3") {
         currentWeaponIndex = 2;
         currentWeapon = weapons[currentWeaponIndex];
         console.log("Vybraná zbraň: " + currentWeapon.name);
+        updateWeaponDisplay(); // AKTUALIZUJ ZBRAŇ V HTML
     }
 });
 window.addEventListener("keyup", (e) => keys[e.key.toLowerCase()] = false);
 canvas.addEventListener("click", shootBullet);
 
-// Pripojenie tlačidiel Game Over obrazovky (ak ich máš v HTML)
+// Tieto event listenery pre tlačidlá Game Over obrazovky
+// už nie sú potrebné, ak presmerúvaš na novú stránku.
+/*
 if (restartButton) {
     restartButton.addEventListener("click", restartGame);
 }
 if (homeButton) {
     homeButton.addEventListener("click", goHome);
 }
+*/
 
-
-// Dôležité: Zavolaj tieto funkcie na začiatku, aby sa inicializovali texty
-updateAmmoDisplay(); // Zobrazí počiatočnú muníciu
-if (hpText) {
-    hpText.innerText = "HP: " + Math.ceil(player.hp); // Zobrazí počiatočné HP
+// Funkcie restartGame() a goHome() už nie sú volané z tejto stránky,
+// pretože presmerujeme používateľa. Sú relevantné len pre score.html.
+/*
+function restartGame() {
+    // Kód pre reštart hry, ak by sa dial na tejto stránke
 }
-
-// Hra sa spustí až po načítaní obrázka hráča (v playerImage.onload)
+function goHome() {
+    // Kód pre návrat domov, ak by sa dial na tejto stránke
+}
+*/
