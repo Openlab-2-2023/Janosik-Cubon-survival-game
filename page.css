@@ -7,19 +7,7 @@ body {
     overflow: hidden;
 }
 
-h1 {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 32px;
-    text-transform: uppercase;
-    color: rgb(255, 115, 0);
-    text-shadow: 2px 2px 0 #000, 4px 4px 0 rgb(184, 53, 5);
-    letter-spacing: 2px;
-    padding: 20px;
-    border: 4px solid rgb(255, 191, 0);
-    background-color: #000;
-    box-shadow: 0 0 10px rgba(255, 8, 0, 0.838);
-}
-
+h1,
 h3 {
     font-family: 'Press Start 2P', cursive;
     font-size: 32px;
@@ -84,19 +72,16 @@ h3 {
 }
 
 @keyframes tail-fade {
-
     0%,
     50% {
         width: var(--star-tail-length);
         opacity: 1;
     }
-
     70%,
     80% {
         width: 0;
         opacity: 0.4;
     }
-
     100% {
         width: 0;
         opacity: 0;
@@ -108,7 +93,6 @@ h3 {
         opacity: 0.6;
     }
 }
-
 
 .button-container {
     display: flex;
@@ -152,29 +136,23 @@ h3 {
     box-shadow: 0 0 0 4px #000, 2px 2px 0 #000;
 }
 
-#wrapper {
-
-    #scoreMessage,
-    h1 {
-        color: white;
-    }
-
+#wrapper #scoreMessage,
+#wrapper h1 {
+    color: white;
 }
-
 
 .music-button {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: none(255, 253, 253, 0.6);
+    background: rgba(255, 253, 253, 0.6); /* Corrected background property */
     border: none;
-    color: none;
+    color: inherit; /* Inherit color or set a specific one */
     font-size: 24px;
     padding: 10px 15px;
     border-radius: 50%;
     cursor: pointer;
 }
-
 
 .music-button img {
     width: 60px;
@@ -182,10 +160,8 @@ h3 {
 }
 
 .score-box {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    /* Odstránené absolútne umiestnenie a súvisiace vlastnosti */
+    /* top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: -100px; */
     background-color: rgba(0, 0, 0, 0.8);
     padding: 2rem;
     border: 4px solid rgb(255, 6, 6);
@@ -193,7 +169,6 @@ h3 {
     z-index: 1;
     text-align: center;
     max-width: 90%;
-    margin-top: -100px;
     font-family: 'Press Start 2P', cursive;
 }
 
