@@ -4,15 +4,8 @@ const ctx = canvas.getContext("2d");
 // Referencie na HTML UI elementy
 const hpText = document.getElementById("hpText");
 const ammoText = document.getElementById("ammoText");
-const waveText = document.getElementById("waveText");     // NOVÉ: pre zobrazenie vlny
-const weaponText = document.getElementById("weaponText"); // NOVÉ: pre zobrazenie zbrane
-
-// Tieto riadky sú teraz pre Game Over obrazovku ZBYTOČNÉ, ak presmerúvaš na novú stránku
-// const gameOverScreen = document.getElementById("gameOverScreen");
-// const finalWaveText = document.getElementById("finalWave");
-// const restartButton = document.getElementById("restartGameButton");
-// const homeButton = document.getElementById("goHomeButton");
-
+const waveText = document.getElementById("waveText");
+const weaponText = document.getElementById("weaponText");
 
 // Zabezpečenie, že kontext canvasu je dostupný
 if (!ctx) {
@@ -85,19 +78,35 @@ let player = {
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    player.x = canvas.width / 2 - player.size / 2;
-    player.y = canvas.height / 2 - player.size / 2;
+    // player.x a player.y sa menia iba pri štarte, nie pri každom resize
+    // Ak by si chcel vycentrovať hráča pri každom resize, odkomentuj:
+    // player.x = canvas.width / 2 - player.size / 2;
+    // player.y = canvas.height / 2 - player.size / 2;
 }
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas(); // Zavolaj pri štarte, aby sa canvas prispôsobil a hráč sa vycentroval
 
-// Načítanie obrázka postavičky
+
+// --- Načítanie obrázkov ---
 let playerImage = new Image();
 playerImage.src = "images/doom pixel.png"; // DÔLEŽITÉ: UISTI SA, ŽE TENTO SÚBOR EXISTUJE NA TEJTO CESTE!
 let gameStarted = false; // Nová premenná na sledovanie, či sa hra už začala
 
+// Načítanie obrázka pozadia - NOVINKA
+let backgroundImage = new Image();
+backgroundImage.src = "images/background.jpg"; // UISTI SA, ŽE TENTO SÚBOR EXISTUJE A JE NA TEJTO CESTE!
+let backgroundLoaded = false;
+
+backgroundImage.onload = () => {
+    backgroundLoaded = true;
+    console.log("Obrázok pozadia načítaný.");
+};
+backgroundImage.onerror = () => {
+    console.warn("Nepodarilo sa načítať obrázok pozadia: " + backgroundImage.src + ". Použije sa čierna farba.");
+};
+
 playerImage.onload = () => {
-    // Až po načítaní obrázka môžeme začať hernú slučku
+    // Až po načítaní obrázka hráča (a ideálne aj pozadia) môžeme začať hernú slučku
     if (!gameStarted) {
         startNewWave(); // Spusti prvú vlnu (teraz volá updateWaveDisplay v sebe)
         updateAmmoDisplay(); // Inicializuj zobrazenie munície
@@ -131,8 +140,7 @@ const enemyTypes = [
     { name: "green", speed: 0.5, hp: 5, color: "green", damage: 1.2, minWave: 8, image: "img/enemy_green.png" }
 ];
 
-// Načítanie obrázkov pre nepriateľov - TENTO BLOK JE ZAKOMENTOVANÝ / UPRAVENÝ
-// Aby sa predišlo chybám 404, ak obrázky ešte neexistujú
+// Načítanie obrázkov pre nepriateľov - ZAKOMENTOVANÉ / UPRAVENÉ
 const enemyImages = {};
 /*
 enemyTypes.forEach(type => {
@@ -148,12 +156,11 @@ enemyTypes.forEach(type => {
 let boss = null;
 const bossType = { speed: 1, hp: 10, color: "orange", damage: 3, size: 80, image: "img/boss.png" };
 
-// Načítanie obrázka bossa - TENTO BLOK JE UPRAVENÝ
-// Ak obrázok bossa neexistuje, jednoducho ho nenačítavaj
+// Načítanie obrázka bossa - ZAKOMENTOVANÉ / UPRAVENÉ
 const bossImage = new Image();
 bossImage.src = ""; // Nastav prázdny reťazec, aby sa nenačítal žiadny súbor
 /*
-bossImage.src = bossType.image; // Pôvodný riadok, teraz zakomentovaný/vyprázdnený
+bossImage.src = bossType.image;
 bossImage.onerror = () => {
     console.warn("Nepodarilo sa načítať obrázok bossa: " + bossType.image + ". Použije sa farba.");
 };
@@ -471,8 +478,8 @@ function moveBullets() {
 
                 if (enemy.hp <= 0) {
                     enemies.splice(j, 1);
-                    // Šanca na vypadnutie power-upu
-                    if (Math.random() < 0.5) { // 50% šanca
+                    // Šanca na vypadnutie power-upu (upravené na 50% šancu celkovo)
+                    if (Math.random() < 0.5) { // 50% celková šanca, že niečo vypadne
                         const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
                         powerUps.push({
                             x: enemy.x,
@@ -574,38 +581,40 @@ function manageActivePowerUps() {
 
 // Funkcia vykreslovania
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Vyčisti canvas
+    // 1. Vykresli pozadie - NOVINKA
+    if (backgroundLoaded) {
+        // Možnosť A: Roztiahnuť obrázok na celú obrazovku
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+    } else {
+        // Záložná farba, ak sa obrázok nenačítal alebo ešte nie je načítaný
+        ctx.fillStyle = "#000"; // Čierna farba pozadia
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // 2. Vyčisti starý obsah (clearRect už nie je potrebný, ak vykresľuješ pozadie každú snímku)
+    // ctx.clearRect(0, 0, canvas.width, canvas.height); // Tento riadok teraz zakomentuj/odstráň, ak máš fillRect
 
     // Vykreslenie hráča
-    if (playerImage.complete && playerImage.naturalWidth !== 0) { // Kontrola, či je obrázok načítaný
+    if (playerImage.complete && playerImage.naturalWidth !== 0) {
         ctx.drawImage(playerImage, player.x, player.y, player.size, player.size);
     } else {
-        // Záložný obdĺžnik, ak sa obrázok nenačítal
         ctx.fillStyle = "blue";
         ctx.fillRect(player.x, player.y, player.size, player.size);
     }
-    drawHpBar(player.x, player.y - 20, player.size, player.hp, player.maxHp); // Šírka 50 pre HP bar hráča
+    drawHpBar(player.x, player.y - 20, player.size, player.hp, player.maxHp);
 
-    // Vykreslenie nepriateľov (teraz vždy ako farebné štvorce, lebo obrázky nenačítavame)
+    // Vykreslenie nepriateľov (stále ako farebné štvorce, kým nemáš obrázky)
     enemies.forEach(enemy => {
-        // if (enemy.image && enemy.image.complete && enemy.image.naturalWidth !== 0) {
-        //     ctx.drawImage(enemy.image, enemy.y, enemy.y, enemy.size, enemy.size); // OPRAVENÉ: enemy.x
-        // } else {
-            ctx.fillStyle = enemy.color; // Použi definovanú farbu
-            ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
-        // }
-        drawHpBar(enemy.x, enemy.y - 15, enemy.size, enemy.hp, enemy.maxHp); // HP bar pre nepriateľa
+        ctx.fillStyle = enemy.color;
+        ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
+        drawHpBar(enemy.x, enemy.y - 15, enemy.size, enemy.hp, enemy.maxHp);
     });
 
-    // Vykreslenie bossa (teraz vždy ako farebný štvorec, lebo obrázok nenačítavame)
+    // Vykreslenie bossa (stále ako farebný štvorec, kým nemáš obrázok)
     if (boss) {
-        // if (bossImage.complete && bossImage.naturalWidth !== 0) {
-        //     ctx.drawImage(bossImage, boss.x, boss.y, boss.size, boss.size);
-        // } else {
-            ctx.fillStyle = boss.color; // Použi definovanú farbu
-            ctx.fillRect(boss.x, boss.y, boss.size, boss.size);
-        // }
-        drawHpBar(boss.x, boss.y - 25, boss.size, boss.hp, boss.maxHp); // HP bar pre bossa
+        ctx.fillStyle = boss.color;
+        ctx.fillRect(boss.x, boss.y, boss.size, boss.size);
+        drawHpBar(boss.x, boss.y - 25, boss.size, boss.hp, boss.maxHp);
     }
 
     // Vykreslenie nábojov
@@ -624,8 +633,6 @@ function draw() {
         ctx.fillText(powerUp.name, powerUp.x + powerUp.size / 2, powerUp.y + powerUp.size / 2 + 3);
         ctx.textAlign = "left"; // Reset pre ostatný text
     });
-
-    // drawWaveAndWeaponText(); // TÚTO FUNKCIU UŽ NEVOLÁME, TEXTY SÚ V HTML
 }
 
 let gameLoopId; // ID pre requestAnimationFrame
@@ -659,7 +666,6 @@ function endGame() {
     boss = null;
 
     // *** KĽÚČOVÁ ZMENA: Presmerovanie na externú stránku so skóre ***
-    // Uisti sa, že "deadwindow.html" je správna cesta k tvojej stránke so skóre
     window.location.href = "deadwindow.html?score=" + currentWave;
 }
 
@@ -688,25 +694,3 @@ window.addEventListener("keydown", (e) => {
 });
 window.addEventListener("keyup", (e) => keys[e.key.toLowerCase()] = false);
 canvas.addEventListener("click", shootBullet);
-
-// Tieto event listenery pre tlačidlá Game Over obrazovky
-// už nie sú potrebné, ak presmerúvaš na novú stránku.
-/*
-if (restartButton) {
-    restartButton.addEventListener("click", restartGame);
-}
-if (homeButton) {
-    homeButton.addEventListener("click", goHome);
-}
-*/
-
-// Funkcie restartGame() a goHome() už nie sú volané z tejto stránky,
-// pretože presmerujeme používateľa. Sú relevantné len pre score.html.
-/*
-function restartGame() {
-    // Kód pre reštart hry, ak by sa dial na tejto stránke
-}
-function goHome() {
-    // Kód pre návrat domov, ak by sa dial na tejto stránke
-}
-*/
