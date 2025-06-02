@@ -1,19 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survival Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="page.css">
 </head>
-<body>
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
-    
-    <div id="game-ui">
-        <p id="hpText">HP: 5</p>
-        <p id="ammoText">Munícia: 100/100</p>
-        <p id="waveText">Vlna: 0</p> <p id="weaponText">Zbraň: Pistol</p> </div>
 
-    <script src="script.js"></script>
+<body>
+    <div class="stars"></div>
+    <div class="button-container">
+        <h1>SURVIVAL GAME</h1>
+        <!-- <a href="./index.html" class="page-button">PLAY</a> -->
+        <a href="./menu.html" class="page-button">PLAY</a>
+        <!-- <a href="./rules.html" class="page-button">Settings </a> -->
+    </div>
+
+    <audio id="background-music" loop>
+        <source src="02. Cultist Base.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <button id="music-toggle" class="music-button">
+        <img id="music-icon" src="images/soundoff.png" alt="Music Icon" width="30">
+    </button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const starsContainer = document.querySelector(".stars");
+            const music = document.getElementById("background-music");
+            const musicButton = document.getElementById("music-toggle");
+            const musicIcon = document.getElementById("music-icon");
+
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement("div");
+                star.classList.add("star");
+
+                const starTailLength = Math.random() * (7.5 - 5) + 5;
+                const topOffset = Math.random() * 100;
+                const fallDuration = Math.random() * (12 - 6) + 6;
+                const fallDelay = Math.random() * 10;
+
+                star.style.setProperty("--star-tail-length", `${starTailLength}em`);
+                star.style.setProperty("--top-offset", `${topOffset}vh`);
+                star.style.setProperty("--fall-duration", `${fallDuration}s`);
+                star.style.setProperty("--fall-delay", `${fallDelay}s`);
+
+                starsContainer.appendChild(star);
+            }
+
+            musicButton.addEventListener("click", () => {
+                if (music.paused) {
+                    music.play();
+                    musicIcon.src = "images/soundoff.png";
+                } else {
+                    music.pause();
+                    musicIcon.src = "images/soundon.png";
+                }
+            });
+        });
+    
+        
+    </script>
+
 </body>
+
 </html>
