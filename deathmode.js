@@ -182,7 +182,8 @@ const weapons = [
         bulletSpeed: 10,
         fireRate: 200,
         ammoCost: 1,
-        size: 5
+        size: 5,
+        type: "ranged" // NOVINKA: typ zbrane
     },
     {
         name: "Shotgun",
@@ -192,7 +193,8 @@ const weapons = [
         ammoCost: 5,
         pellets: 5,
         spread: 0.3,
-        size: 8
+        size: 8,
+        type: "ranged"
     },
     {
         name: "Machinegun",
@@ -200,21 +202,58 @@ const weapons = [
         bulletSpeed: 12,
         fireRate: 80,
         ammoCost: 1,
-        size: 4
+        size: 4,
+        type: "ranged"
+    },
+    // NOVINKA: Melee zbraň
+    {
+        name: "Fist", // Alebo Knife, Chainsaw, atď.
+        damage: 2, // Viac poškodenia, lebo je na blízko
+        fireRate: 400, // Rýchlosť útoku
+        ammoCost: 0, // Melee zbraň nepotrebuje muníciu
+        range: 60, // Dosah melee útoku
+        size: 0, // Melee nemá projektily, veľkosť sa nepoužíva
+        type: "melee" // NOVINKA: typ zbrane
     }
 ];
 
 let currentWeaponIndex = 0;
 let currentWeapon = weapons[currentWeaponIndex];
 let lastShotTime = 0; // Premenná pre kontrolu rýchlosti streľby
+let lastMeleeTime = 0; // NOVINKA: pre melee cooldown
+let isMeleeAttacking = false; // NOVINKA: pre vizuálnu indikáciu melee útoku
+
 
 // --- Power-upy ---
 const powerUpTypes = [
-    { name: "ammo", color: "gold", type: "ammo", value: 50, duration: 0 },
-    { name: "heal", color: "lime", type: "heal", value: 2, duration: 0 },
-    { name: "speed_boost", color: "cyan", type: "speed", value: 2, duration: 5000 },
-    { name: "piercing_bullets", color: "grey", type: "bullet_piercing", value: 1, duration: 7000 }
+    { name: "ammo", color: "gold", type: "ammo", value: 50, duration: 0, image: "images/ammo_box-removebg-preview.png" },
+    { name: "heal", color: "lime", type: "heal", value: 2, duration: 0, image: "images/heart_pixelart.png" },
+    { name: "speed_boost", color: "cyan", type: "speed", value: 2, duration: 5000, image: "images/speedup.png" },
+    { name: "piercing_bullets", color: "grey", type: "bullet_piercing", value: 1, duration: 7000, image: "images/bulllet.png" }
 ];
+
+// NOVINKA: Objekt na ukladanie načítaných obrázkov power-upov
+const powerUpImages = {};
+let powerUpsLoadedCount = 0;
+const totalPowerUps = powerUpTypes.length;
+
+console.log("DEBUG: Začínam načítavať power-up obrázky...");
+
+// NOVINKA: Načítanie všetkých obrázkov power-upov
+powerUpTypes.forEach(type => {
+    powerUpImages[type.type] = new Image();
+    powerUpImages[type.type].src = type.image;
+
+    powerUpImages[type.type].onload = () => {
+        powerUpsLoadedCount++;
+        console.log(`DEBUG: Obrázok pre power-up "${type.name}" načítaný.`);
+    };
+    powerUpImages[type.type].onerror = () => {
+        console.warn(`DEBUG: Nepodarilo sa načítať obrázok pre power-up "${type.name}": ${type.image}.`);
+        powerUpsLoadedCount++;
+    };
+});
+console.log("DEBUG: Skončil som s inicializáciou načítania power-up obrázkov.");
 
 let activePowerUps = [];
 let powerUps = []; // Pole pre power-upy, ktoré sa objavili na mape
@@ -403,6 +442,12 @@ function spawnEnemy(type, safeDistance) {
 
 
 function shootBullet(event) {
+    // Ak aktuálna zbraň je melee, nebudeme strieľať guľky
+    if (currentWeapon.type === "melee") {
+        performMeleeAttack(); // Zavolaj funkciu melee útoku
+        return;
+    }
+
     const now = Date.now();
     if (now - lastShotTime < currentWeapon.fireRate) {
         return; // Ešte nie je čas na ďalší výstrel
@@ -449,6 +494,77 @@ function shootBullet(event) {
         });
     }
 }
+
+// NOVINKA: Funkcia pre melee útok
+function performMeleeAttack() {
+    const now = Date.now();
+    if (now - lastMeleeTime < currentWeapon.fireRate) {
+        return; // Ešte nie je čas na ďalší melee útok
+    }
+
+    lastMeleeTime = now;
+    isMeleeAttacking = true; // Nastav príznak, že prebieha útok
+    setTimeout(() => {
+        isMeleeAttacking = false; // Po krátkej dobe zruš príznak
+    }, currentWeapon.fireRate / 2); // Trvanie vizuálneho útoku je polovica cooldownu
+
+    // Detekcia nepriateľov v dosahu melee útoku
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        let enemy = enemies[i];
+
+        // Vypočítaj vzdialenosť od stredu hráča k stredu nepriateľa
+        let playerCenterX = player.x + player.size / 2;
+        let playerCenterY = player.y + player.size / 2;
+        let enemyCenterX = enemy.x + enemy.size / 2;
+        let enemyCenterY = enemy.y + enemy.size / 2;
+
+        let distance = Math.sqrt((playerCenterX - enemyCenterX) ** 2 + (playerCenterY - enemyCenterY) ** 2);
+
+        // Ak je nepriateľ v dosahu melee a koliduje
+        if (distance < currentWeapon.range + (player.size / 2 + enemy.size / 2)) {
+            enemy.hp -= currentWeapon.damage * globalDamageMultiplier;
+            console.log(`Nepriateľ zasiahnutý melee! HP: ${enemy.hp}`);
+
+            if (enemy.hp <= 0) {
+                enemies.splice(i, 1);
+                // Šanca na vypadnutie power-upu (upravené na 50% šancu celkovo)
+                if (Math.random() < 0.5) { // 50% celková šanca, že niečo vypadne
+                    const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+                    powerUps.push({
+                        x: enemy.x,
+                        y: enemy.y,
+                        size: 15,
+                        color: randomType.color,
+                        type: randomType.type,
+                        value: randomType.value,
+                        duration: randomType.duration,
+                        timeCollected: 0
+                    });
+                }
+            }
+        }
+    }
+
+    // Kontrola kolízie s bossom pre melee
+    if (boss) {
+        let playerCenterX = player.x + player.size / 2;
+        let playerCenterY = player.y + player.size / 2;
+        let bossCenterX = boss.x + boss.size / 2;
+        let bossCenterY = boss.y + boss.size / 2;
+
+        let distance = Math.sqrt((playerCenterX - bossCenterX) ** 2 + (playerCenterY - bossCenterY) ** 2);
+
+        if (distance < currentWeapon.range + (player.size / 2 + boss.size / 2)) {
+            boss.hp -= currentWeapon.damage * globalDamageMultiplier;
+            console.log(`Boss zasiahnutý melee! HP: ${boss.hp}`);
+            if (boss.hp <= 0) {
+                boss = null;
+                console.log("Boss porazený!");
+            }
+        }
+    }
+}
+
 
 function moveBullets() {
     let hasPiercingBullets = activePowerUps.some(pu => pu.type === "bullet_piercing");
@@ -581,18 +697,14 @@ function manageActivePowerUps() {
 
 // Funkcia vykreslovania
 function draw() {
-    // 1. Vykresli pozadie - NOVINKA
+    // 1. Vykresli pozadie
     if (backgroundLoaded) {
-        // Možnosť A: Roztiahnuť obrázok na celú obrazovku
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
     } else {
-        // Záložná farba, ak sa obrázok nenačítal alebo ešte nie je načítaný
+        // Záložná farba, ak sa obrázok nenačítal
         ctx.fillStyle = "#000"; // Čierna farba pozadia
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
-
-    // 2. Vyčisti starý obsah (clearRect už nie je potrebný, ak vykresľuješ pozadie každú snímku)
-    // ctx.clearRect(0, 0, canvas.width, canvas.height); // Tento riadok teraz zakomentuj/odstráň, ak máš fillRect
 
     // Vykreslenie hráča
     if (playerImage.complete && playerImage.naturalWidth !== 0) {
@@ -603,14 +715,22 @@ function draw() {
     }
     drawHpBar(player.x, player.y - 20, player.size, player.hp, player.maxHp);
 
-    // Vykreslenie nepriateľov (stále ako farebné štvorce, kým nemáš obrázky)
+    // NOVINKA: Vizuálna indikácia melee útoku
+    if (isMeleeAttacking) {
+        ctx.fillStyle = "rgba(255, 255, 0, 0.3)"; // Žltý polopriehľadný kruh okolo hráča
+        ctx.beginPath();
+        ctx.arc(player.x + player.size / 2, player.y + player.size / 2, currentWeapon.range, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Vykreslenie nepriateľov
     enemies.forEach(enemy => {
         ctx.fillStyle = enemy.color;
         ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
         drawHpBar(enemy.x, enemy.y - 15, enemy.size, enemy.hp, enemy.maxHp);
     });
 
-    // Vykreslenie bossa (stále ako farebný štvorec, kým nemáš obrázok)
+    // Vykreslenie bossa
     if (boss) {
         ctx.fillStyle = boss.color;
         ctx.fillRect(boss.x, boss.y, boss.size, boss.size);
@@ -625,13 +745,20 @@ function draw() {
 
     // Vykreslenie power-upov
     powerUps.forEach(powerUp => {
-        ctx.fillStyle = powerUp.color;
-        ctx.fillRect(powerUp.x, powerUp.y, powerUp.size, powerUp.size);
-        ctx.fillStyle = "black"; // Text pre power-up
-        ctx.font = "10px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(powerUp.name, powerUp.x + powerUp.size / 2, powerUp.y + powerUp.size / 2 + 3);
-        ctx.textAlign = "left"; // Reset pre ostatný text
+        const powerUpImg = powerUpImages[powerUp.type]; // Získaj obrázok pre tento typ power-upu
+        if (powerUpImg && powerUpImg.complete && powerUpImg.naturalWidth !== 0) {
+            // Ak je obrázok načítaný, vykresli ho
+            ctx.drawImage(powerUpImg, powerUp.x, powerUp.y, powerUp.size, powerUp.size);
+        } else {
+            // Ak obrázok nie je načítaný, vykresli farebný štvorec a text (záložný režim)
+            ctx.fillStyle = powerUp.color;
+            ctx.fillRect(powerUp.x, powerUp.y, powerUp.size, powerUp.size);
+            ctx.fillStyle = "black"; // Text pre power-up
+            ctx.font = "10px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(powerUp.name, powerUp.x + powerUp.size / 2, powerUp.y + powerUp.size / 2 + 3);
+            ctx.textAlign = "left"; // Reset pre ostatný text
+        }
     });
 }
 
@@ -674,23 +801,25 @@ function endGame() {
 window.addEventListener("keydown", (e) => {
     keys[e.key.toLowerCase()] = true;
 
-    // Prepínanie zbraní (číslami 1, 2, 3)
+    // Prepínanie zbraní (číslami 1, 2, 3, 4 - pre novú melee zbraň)
     if (e.code === "Digit1") {
         currentWeaponIndex = 0;
-        currentWeapon = weapons[currentWeaponIndex];
-        console.log("Vybraná zbraň: " + currentWeapon.name);
-        updateWeaponDisplay(); // AKTUALIZUJ ZBRAŇ V HTML
     } else if (e.code === "Digit2") {
         currentWeaponIndex = 1;
-        currentWeapon = weapons[currentWeaponIndex];
-        console.log("Vybraná zbraň: " + currentWeapon.name);
-        updateWeaponDisplay(); // AKTUALIZUJ ZBRAŇ V HTML
     } else if (e.code === "Digit3") {
         currentWeaponIndex = 2;
+    } else if (e.code === "Digit4") { // NOVINKA: Klávesa pre melee zbraň
+        currentWeaponIndex = 3; // Index pre Fist (alebo akúkoľvek melee zbraň)
+    }
+
+    // Aplikuj vybranú zbraň a aktualizuj UI, len ak je index platný
+    if (currentWeaponIndex >= 0 && currentWeaponIndex < weapons.length) {
         currentWeapon = weapons[currentWeaponIndex];
         console.log("Vybraná zbraň: " + currentWeapon.name);
         updateWeaponDisplay(); // AKTUALIZUJ ZBRAŇ V HTML
     }
 });
 window.addEventListener("keyup", (e) => keys[e.key.toLowerCase()] = false);
+
+// Kliknutie myšou bude aktivovať streľbu ALEBO melee útok v závislosti od vybranej zbrane
 canvas.addEventListener("click", shootBullet);
