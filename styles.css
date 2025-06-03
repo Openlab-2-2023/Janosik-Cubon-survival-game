@@ -7,36 +7,68 @@ body {
     font-family: Arial, sans-serif;
 }
 
-canvas {
-    background: #111;
-    display: block;
-    margin: auto;
-    border: 2px solid white;
-    width: 100vw;
-    height: 100vh;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
+#gameCanvas {
+    border: 3px solid #000; /* Trochu hrubší rámček */
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    /* Rozmery canvasu sú stále definované v HTML (width="600" height="400") */
+    /* Ak chceš responzívny canvas, rozmery by sa mali nastavovať cez JS alebo CSS percentami/vh/vw */
 }
 
 #game-ui {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    z-index: 10;
-    /* Farba a font pre game-ui kontajner, aby sa zdedili */
-    color: white; 
-    font-family: Arial, sans-serif;
-    font-size: 18px; 
-    /* Použijeme flexbox pre jednoduché vertikálne usporiadanie */
+    top: 25px; /* Trochu väčší odstup zhora */
+    left: 25px; /* Trochu väčší odstup zľava */
+    padding: 20px; /* Väčšie vnútorné odsadenie */
+    background-color: rgba(0, 0, 0, 0.7); /* Mierne tmavšie pozadie pre lepší kontrast */
+    border: 3px solid #555; /* Trochu hrubší a svetlejší okraj */
+    border-radius: 0;
+    box-shadow: 6px 6px 0px #000000bb; /* Výraznejší tieň */
+    
+    font-family: 'Press Start 2P', cursive;
+    color: #FFF;
+    font-size: 16px; /* ZVÄČŠENÁ základná veľkosť fontu (bola 12px) */
+
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: never;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#game-ui p,
+#game-ui div > span {
+    margin: 0 0 12px 0; /* Väčšia medzera pod prvkami */
+    padding: 0;
+    line-height: 1.3; /* Upravená výška riadku pre väčší font */
+    font-weight: normal;
+}
+
+#hpDisplayContainer,
+#weaponDisplayContainer {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Zarovná texty doľava */
-    padding-left: 10px; /* Odsadenie od ľavého okraja */
+    align-items: center;
+    margin-bottom: 12px; /* Väčšia medzera pod týmito kontajnermi */
+}
+
+#hpDisplayContainer > span,
+#weaponDisplayContainer > span {
+    margin-right: 10px; /* Väčšia medzera medzi textom a ikonami */
+}
+
+#hpHeartsContainer img {
+    width: 24px;  /* ZVÄČŠENÁ šírka srdiečok (bola 16px) */
+    height: 24px; /* ZVÄČŠENÁ výška srdiečok (bola 16px) */
+    margin-right: 4px; /* Trochu väčšia medzera medzi srdiečkami */
+    vertical-align: middle;
+}
+
+#weaponImageDisplay {
+    width: 48px;  /* ZVÄČŠENÁ šírka obrázku zbrane (bola 32px) */
+    height: auto; 
+    vertical-align: middle;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 
 /* Štýly pre jednotlivé textové prvky v #game-ui */

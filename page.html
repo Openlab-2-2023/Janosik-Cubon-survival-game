@@ -9,13 +9,15 @@
 <body>
     <canvas id="gameCanvas" width="600" height="400"></canvas>
     
-<div id="game-ui">
-    <p id="hpText">HP: 5</p>
-    <p id="ammoText">Munícia: 100/100</p>
-    <p id="waveText">Vlna: 0</p>
-    <div id="weaponDisplayContainer" style="display: flex; align-items: center;"> <span style="margin-right: 5px;">Zbraň:</span> <img id="weaponImageDisplay" src="" alt="Aktuálna zbraň" style="width: 50px; height: auto; vertical-align: middle;">
+<canvas id="gameCanvas" width="600" height="400"></canvas> <div id="game-ui">
+        <div id="hpDisplayContainer"> <span>HP: 5</span> <div id="hpHeartsContainer">
+                </div>
+        </div>
+        <p id="ammoText">Munícia: 100/100</p>
+        <p id="waveText">Vlna: 0</p>
+        <div id="weaponDisplayContainer"> <span>Zbraň:</span> <img id="weaponImageDisplay" src="" alt="Aktuálna zbraň">
+        </div>
     </div>
-</div>
 
     <script src="script.js"></script>
 </body>

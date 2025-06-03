@@ -637,7 +637,7 @@ function manageActivePowerUps() {
 
 // Funkcia vykreslovania (bez zmien)
 function draw() {
-    if (backgroundLoaded) {
+    if (backgroundLoaded && backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
     } else {
         ctx.fillStyle = "#000";
@@ -650,6 +650,7 @@ function draw() {
         ctx.fillRect(player.x, player.y, player.size, player.size);
     }
     drawHpBar(player.x, player.y - 20, player.size, player.hp, player.maxHp);
+
     if (isMeleeAttacking) {
         ctx.fillStyle = "rgba(255, 255, 0, 0.3)";
         ctx.beginPath();
@@ -667,21 +668,20 @@ function draw() {
         drawHpBar(boss.x, boss.y - 25, boss.size, boss.hp, boss.maxHp);
     }
     bullets.forEach(bullet => {
-        ctx.fillStyle = "red";
-        ctx.fillRect(bullet.x, bullet.y, bullet.size, bullet.size);
+        ctx.fillStyle = "yellow";
+        ctx.fillRect(bullet.x - bullet.size / 2, bullet.y - bullet.size / 2, bullet.size, bullet.size);
     });
+
+    // ÚPRAVA PRE ZVÄČŠENIE POWER-UPOV
     powerUps.forEach(powerUp => {
         const powerUpImg = powerUpImages[powerUp.type];
+        const displaySize = powerUp.size * 4.0; // Nový multiplikátor pre veľkosť (predtým 1.5)
+
         if (powerUpImg && powerUpImg.complete && powerUpImg.naturalWidth !== 0) {
-            ctx.drawImage(powerUpImg, powerUp.x, powerUp.y, powerUp.size, powerUp.size);
+            ctx.drawImage(powerUpImg, powerUp.x, powerUp.y, displaySize, displaySize);
         } else {
             ctx.fillStyle = powerUp.color;
-            ctx.fillRect(powerUp.x, powerUp.y, powerUp.size, powerUp.size);
-            ctx.fillStyle = "black";
-            ctx.font = "10px Arial";
-            ctx.textAlign = "center";
-            // ctx.fillText(powerUp.name, powerUp.x + powerUp.size / 2, powerUp.y + powerUp.size / 2 + 3); // Ak by si chcel text
-            ctx.textAlign = "left";
+            ctx.fillRect(powerUp.x, powerUp.y, displaySize, displaySize);
         }
     });
 }
