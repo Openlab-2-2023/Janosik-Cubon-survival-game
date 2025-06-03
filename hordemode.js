@@ -1,22 +1,16 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Referencie na HTML UI elementy
 const hpText = document.getElementById("hpText");
 const ammoText = document.getElementById("ammoText");
 const waveText = document.getElementById("waveText");
-// const weaponText = document.getElementById("weaponText"); // ODSTRÁNENÉ - nahradené weaponImageDisplay
-const weaponImageDisplay = document.getElementById("weaponImageDisplay"); // NOVINKA: Referencia na <img> element pre zbraň
-                                                                        // UISTI SA, ŽE TENTO ELEMENT EXISTUJE V TVOJOM HTML!
-                                                                        // Napr.: <div>Zbraň: <img id="weaponImageDisplay" alt="Aktuálna zbraň" style="width:50px; height:auto;"></div>
+const weaponImageDisplay = document.getElementById("weaponImageDisplay");
 
-// Zabezpečenie, že kontext canvasu je dostupný
 if (!ctx) {
     console.error("Nepodarilo sa získať 2D kontext canvasu!");
     alert("Chyba: Nepodarilo sa inicializovať hru. Váš prehliadač možno nepodporuje Canvas.");
 }
 
-// --- Nastavenia hry podľa módu obtiažnosti ---
 let gameMode = localStorage.getItem("gameMode") || "normal";
 
 let playerInitialHp;
@@ -65,7 +59,6 @@ switch (gameMode) {
         break;
 }
 
-// Hráč - inicializácia s hodnotami z módu
 let player = {
     x: canvas.width / 2,
     y: canvas.height / 2,
@@ -77,7 +70,6 @@ let player = {
     maxAmmo: 100
 };
 
-// Funkcia na prispôsobenie veľkosti canvasu obrazovke
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -91,14 +83,11 @@ playerImage.src = "images/doom pixel.png";
 let backgroundImage = new Image();
 backgroundImage.src = "images/background..png";
 
-// NOVINKA: Obrázok pre zobrazenie HP
 let heartDisplayImage = new Image();
-heartDisplayImage.src = "images/h"; // UISTI SA, ŽE TENTO SÚBOR EXISTUJE!
+heartDisplayImage.src = "images/h";
 
 let gameStarted = false;
-// ...
 
-// --- Zbrane ---
 const weapons = [
     {
         name: "Pistol",
@@ -108,7 +97,7 @@ const weapons = [
         ammoCost: 1,
         size: 5,
         type: "ranged",
-        imageSrc: "images/pistol_pixel-removebg-preview.png" // NOVINKA: Cesta k obrázku pištole
+        imageSrc: "images/pistol_pixel-removebg-preview.png"
     },
     {
         name: "Shotgun",
@@ -120,7 +109,7 @@ const weapons = [
         spread: 0.3,
         size: 8,
         type: "ranged",
-        imageSrc: "images/shotgun_pixel-removebg-preview.png" // NOVINKA: Cesta k obrázku brokovnice
+        imageSrc: "images/shotgun_pixel-removebg-preview.png"
     },
     {
         name: "Machinegun",
@@ -130,7 +119,7 @@ const weapons = [
         ammoCost: 1,
         size: 4,
         type: "ranged",
-        imageSrc: "images/machinegun_pixel-removebg-preview.png" // NOVINKA: Cesta k obrázku guľometu
+        imageSrc: "images/machinegun_pixel-removebg-preview.png"
     },
     {
         name: "Fist",
@@ -140,11 +129,10 @@ const weapons = [
         range: 60,
         size: 0,
         type: "melee",
-        imageSrc: "images/fist_pixel-removebg-preview.png" // NOVINKA: Cesta k obrázku päste/melee
+        imageSrc: "images/fist_pixel-removebg-preview.png"
     }
 ];
 
-// --- Power-upy ---
 const powerUpTypes = [
     { name: "ammo", color: "gold", type: "ammo", value: 50, duration: 0, image: "images/ammo_box-removebg-preview.png" },
     { name: "heal", color: "lime", type: "heal", value: 2, duration: 0, image: "images/heart_pixelart.png" },
@@ -152,7 +140,6 @@ const powerUpTypes = [
     { name: "piercing_bullets", color: "grey", type: "bullet_piercing", value: 1, duration: 7000, image: "images/bulllet.png" }
 ];
 
-// --- Manažment načítania assetov ---
 let assetsToLoad = 0;
 let assetsLoaded = 0;
 
@@ -165,11 +152,9 @@ function signalAssetLoaded() {
     }
 }
 
-// Registrujeme počet všetkých assetov, ktoré potrebujeme načítať
-assetsToLoad++; // playerImage
-assetsToLoad++; // backgroundImage
+assetsToLoad++;
+assetsToLoad++;
 
-// Načítanie obrázka pozadia
 backgroundImage.onload = () => {
     backgroundLoaded = true;
     console.log("Obrázok pozadia načítaný.");
@@ -177,22 +162,20 @@ backgroundImage.onload = () => {
 };
 backgroundImage.onerror = () => {
     console.warn("Nepodarilo sa načítať obrázok pozadia: " + backgroundImage.src + ". Použije sa čierna farba.");
-    signalAssetLoaded(); // Aj pri chybe signalizujeme, aby hra mohla pokračovať
+    signalAssetLoaded();
 };
 
-// Načítanie obrázka hráča
 playerImage.onload = () => {
     console.log("Obrázok hráča načítaný.");
     signalAssetLoaded();
 };
 playerImage.onerror = () => {
     console.error("Nepodarilo sa načítať obrázok hráča: " + playerImage.src + ". Hra sa spúšťa bez obrázka.");
-    signalAssetLoaded(); // Aj pri chybe
+    signalAssetLoaded();
 };
 
-// NOVINKA: Načítanie obrázkov zbraní
 const weaponImages = {};
-assetsToLoad += weapons.length; // Pridaj počet obrázkov zbraní k celkovému počtu assetov
+assetsToLoad += weapons.length;
 
 weapons.forEach(weapon => {
     weaponImages[weapon.name] = new Image();
@@ -203,14 +186,12 @@ weapons.forEach(weapon => {
     };
     weaponImages[weapon.name].onerror = () => {
         console.warn(`Nepodarilo sa načítať obrázok pre zbraň "${weapon.name}": ${weapon.imageSrc}.`);
-        signalAssetLoaded(); // Aj pri chybe signalizujeme
+        signalAssetLoaded();
     };
 });
 
-
-// NOVINKA: Objekt na ukladanie načítaných obrázkov power-upov
 const powerUpImages = {};
-assetsToLoad += powerUpTypes.length; // Pridaj počet obrázkov power-upov
+assetsToLoad += powerUpTypes.length;
 
 console.log("DEBUG: Začínam načítavať power-up obrázky...");
 powerUpTypes.forEach(type => {
@@ -223,26 +204,24 @@ powerUpTypes.forEach(type => {
     };
     powerUpImages[type.type].onerror = () => {
         console.warn(`DEBUG: Nepodarilo sa načítať obrázok pre power-up "${type.name}": ${type.image}.`);
-        signalAssetLoaded(); // Aj pri chybe
+        signalAssetLoaded();
     };
 });
 console.log("DEBUG: Skončil som s inicializáciou načítania power-up obrázkov.");
 console.log(`Celkový počet assetov na načítanie: ${assetsToLoad}`);
 
-// Funkcia, ktorá sa zavolá, keď sú všetky assety načítané
 function initializeGameAndStartLoop() {
-    if (!gameStarted) { // Zabezpečenie, aby sa nespustila viackrát
+    if (!gameStarted) {
         startNewWave();
         updateAmmoDisplay();
         updateHpDisplay();
-        updateWeaponDisplay(); // Inicializuj zobrazenie obrázku zbrane
+        updateWeaponDisplay();
         gameLoop();
         gameStarted = true;
         console.log("Hra spustená.");
     }
 }
 
-// Typy nepriateľov (bez zmien)
 const enemyTypes = [
     { name: "red", speed: 1.5, hp: 1, color: "red", damage: 0.2, minWave: 1, image: "img/enemy_red.png" },
     { name: "purple", speed: 2.5, hp: 1, color: "purple", damage: 0.5, minWave: 1, image: "img/baron_of_hell_pixel.png" },
@@ -250,14 +229,9 @@ const enemyTypes = [
     { name: "blue", speed: 5.0, hp: 2, color: "blue", damage: 0.7, minWave: 5, image: "img/enemy_blue.png" },
     { name: "green", speed: 0.5, hp: 5, color: "green", damage: 1.2, minWave: 8, image: "img/enemy_green.png" }
 ];
-// Načítanie obrázkov pre nepriateľov - ZAKOMENTOVANÉ / UPRAVENÉ (bez zmien)
-// ...
 
-// Boss (bez zmien)
 let boss = null;
 const bossType = { speed: 1, hp: 10, color: "orange", damage: 3, size: 80, image: "img/boss.png" };
-// Načítanie obrázka bossa - ZAKOMENTOVANÉ / UPRAVENÉ (bez zmien)
-// ...
 
 let enemies = [];
 let bullets = [];
@@ -275,7 +249,6 @@ let isMeleeAttacking = false;
 let activePowerUps = [];
 let powerUps = [];
 
-// HP bar funkcia (bez zmien)
 function drawHpBar(x, y, width, hp, maxHp) {
     const barHeight = 7;
     const hpPercentage = hp / maxHp;
@@ -288,7 +261,6 @@ function drawHpBar(x, y, width, hp, maxHp) {
     ctx.strokeRect(x, y, width, barHeight);
 }
 
-// Funkcie na aktualizáciu HTML UI elementov
 function updateHpDisplay() {
     if (hpText) {
         hpText.innerText = "HP: " + Math.ceil(player.hp);
@@ -307,29 +279,23 @@ function updateWaveDisplay() {
     }
 }
 
-// AKTUALIZOVANÁ FUNKCIA PRE ZOBRAZENIE OBRÁZKU ZBRANE
 function updateWeaponDisplay() {
-    if (weaponImageDisplay) { // Skontroluj, či HTML element existuje
-        const weaponImgObject = weaponImages[currentWeapon.name]; // Získaj prednačítaný Image objekt
+    if (weaponImageDisplay) {
+        const weaponImgObject = weaponImages[currentWeapon.name];
 
         if (weaponImgObject && weaponImgObject.complete && weaponImgObject.naturalWidth !== 0) {
-            // Ak je obrázok načítaný a platný
             weaponImageDisplay.src = weaponImgObject.src;
-            weaponImageDisplay.alt = currentWeapon.name; // Dôležité pre prístupnosť
+            weaponImageDisplay.alt = currentWeapon.name;
         } else {
-            // Fallback, ak sa obrázok nenačítal alebo je chybný
-            weaponImageDisplay.src = ""; // Vyčisti src alebo nastav cestu k defaultnému placeholder obrázku
+            weaponImageDisplay.src = "";
             weaponImageDisplay.alt = currentWeapon.name + " (obrázok sa nenačítal)";
             console.warn(`Obrázok pre zbraň "${currentWeapon.name}" nie je dostupný alebo sa nenačítal správne. Použitý zdroj: ${currentWeapon.imageSrc}`);
-            // Môžeš tu zobraziť aj textový názov ako fallback, ak máš na to pripravený iný HTML element
         }
     } else {
         console.warn("HTML element 'weaponImageDisplay' pre zobrazenie obrázku zbrane nebol nájdený v HTML dokumente.");
     }
 }
 
-
-// Pohyb hráča (WASD) (bez zmien)
 function movePlayer() {
     let currentSpeed = player.speed;
     if (keys["w"]) player.y = Math.max(0, player.y - currentSpeed);
@@ -338,7 +304,6 @@ function movePlayer() {
     if (keys["d"]) player.x = Math.min(canvas.width - player.size, player.x + currentSpeed);
 }
 
-// Pohyb nepriateľov (bez zmien)
 function moveEnemies() {
     enemies.forEach(enemy => {
         let dx = player.x - enemy.x;
@@ -383,7 +348,6 @@ function moveEnemies() {
     }
 }
 
-// startNewWave (bez zmien)
 function startNewWave() {
     if (waveInProgress) return;
     waveInProgress = true;
@@ -422,7 +386,6 @@ function startNewWave() {
     waveInProgress = false;
 }
 
-// spawnEnemy (bez zmien)
 function spawnEnemy(type, safeDistance) {
     let spawnX, spawnY;
     do {
@@ -438,7 +401,6 @@ function spawnEnemy(type, safeDistance) {
     });
 }
 
-// shootBullet (bez zmien)
 function shootBullet(event) {
     if (currentWeapon.type === "melee") {
         performMeleeAttack();
@@ -478,7 +440,6 @@ function shootBullet(event) {
     }
 }
 
-// performMeleeAttack (bez zmien)
 function performMeleeAttack() {
     const now = Date.now();
     if (now - lastMeleeTime < currentWeapon.fireRate) return;
@@ -526,7 +487,6 @@ function performMeleeAttack() {
     }
 }
 
-// moveBullets (bez zmien)
 function moveBullets() {
     let hasPiercingBullets = activePowerUps.some(pu => pu.type === "bullet_piercing");
     for (let i = bullets.length - 1; i >= 0; i--) {
@@ -580,7 +540,6 @@ function moveBullets() {
     }
 }
 
-// checkPowerUpCollisions (bez zmien)
 function checkPowerUpCollisions() {
     for (let i = powerUps.length - 1; i >= 0; i--) {
         let powerUp = powerUps[i];
@@ -616,7 +575,6 @@ function checkPowerUpCollisions() {
     }
 }
 
-// manageActivePowerUps (bez zmien)
 function manageActivePowerUps() {
     for (let i = activePowerUps.length - 1; i >= 0; i--) {
         let powerUp = activePowerUps[i];
@@ -635,7 +593,6 @@ function manageActivePowerUps() {
     }
 }
 
-// Funkcia vykreslovania (bez zmien)
 function draw() {
     if (backgroundLoaded && backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
@@ -672,10 +629,9 @@ function draw() {
         ctx.fillRect(bullet.x - bullet.size / 2, bullet.y - bullet.size / 2, bullet.size, bullet.size);
     });
 
-    // ÚPRAVA PRE ZVÄČŠENIE POWER-UPOV
     powerUps.forEach(powerUp => {
         const powerUpImg = powerUpImages[powerUp.type];
-        const displaySize = powerUp.size * 4.0; // Nový multiplikátor pre veľkosť (predtým 1.5)
+        const displaySize = powerUp.size * 4.0;
 
         if (powerUpImg && powerUpImg.complete && powerUpImg.naturalWidth !== 0) {
             ctx.drawImage(powerUpImg, powerUp.x, powerUp.y, displaySize, displaySize);
@@ -701,7 +657,6 @@ function gameLoop() {
     gameLoopId = requestAnimationFrame(gameLoop);
 }
 
-// Funkcia volaná pri Game Over (bez zmien)
 function endGame() {
     cancelAnimationFrame(gameLoopId);
     console.log("KONIEC HRY! Hráč dosiahol 0 HP. Presmerujem na stránku so skóre.");
@@ -713,10 +668,9 @@ function endGame() {
     window.location.href = "deadwindow.html?score=" + currentWave;
 }
 
-// Event Listenery
 window.addEventListener("keydown", (e) => {
     keys[e.key.toLowerCase()] = true;
-    let weaponChanged = false; // Sleduj, či sa zbraň skutočne zmenila
+    let weaponChanged = false;
 
     if (e.code === "Digit1" && currentWeaponIndex !== 0) {
         currentWeaponIndex = 0;
@@ -727,22 +681,17 @@ window.addEventListener("keydown", (e) => {
     } else if (e.code === "Digit3" && currentWeaponIndex !== 2) {
         currentWeaponIndex = 2;
         weaponChanged = true;
-    } else if (e.code === "Digit4" && currentWeaponIndex !== 3) { // NOVINKA: Klávesa pre melee zbraň
+    } else if (e.code === "Digit4" && currentWeaponIndex !== 3) {
         currentWeaponIndex = 3;
         weaponChanged = true;
     }
 
-    // Aplikuj vybranú zbraň a aktualizuj UI, len ak sa zmenila a index je platný
     if (weaponChanged && currentWeaponIndex >= 0 && currentWeaponIndex < weapons.length) {
         currentWeapon = weapons[currentWeaponIndex];
         console.log("Vybraná zbraň: " + currentWeapon.name);
-        updateWeaponDisplay(); // AKTUALIZUJ OBRAZ ZBRANE V HTML
+        updateWeaponDisplay();
     }
 });
 window.addEventListener("keyup", (e) => keys[e.key.toLowerCase()] = false);
 
 canvas.addEventListener("click", shootBullet);
-
-// Na konci scriptu, po definovaní všetkých funkcií a premenných,
-// sa môže začať proces načítavania (už sa deje nastavením .src obrázkov).
-// Hra sa spustí automaticky cez initializeGameAndStartLoop(), keď budú všetky assety načítané.
